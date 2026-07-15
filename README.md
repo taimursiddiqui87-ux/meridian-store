@@ -1,5 +1,7 @@
 # MERIDIAN — Premium Multi-Category E-commerce
 
+**Live demo:** [meridian-store-beige.vercel.app](https://meridian-store-beige.vercel.app) · **Admin:** [/admin](https://meridian-store-beige.vercel.app/admin) · **Repo:** [taimursiddiqui87-ux/meridian-store](https://github.com/taimursiddiqui87-ux/meridian-store)
+
 A Shopify-style storefront **and** admin backend for a premium watch brand, built to expand into two upcoming product lines (Eyewear, Leather Goods).
 
 Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS** — one codebase serves both the customer-facing storefront and the admin dashboard.
