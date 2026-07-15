@@ -59,9 +59,13 @@ Plus a persistent cart (localStorage), a custom 404, and full responsive + light
 
 ## Roadmap
 
-- **Phase 1 — Design** ✅ _(this delivery)_ — full responsive UI for storefront + admin, with working cart, filtering, and interactive product management.
-- **Phase 2 — Commerce logic** — real auth (login/signup), Stripe/PayPal payments, order persistence, and transactional **order-confirmation emails**.
-- **Phase 3 — Live backend** — connect the admin to a real database/API so product, inventory, order and banner changes persist.
+- **Phase 1 — Design** ✅ — full responsive UI for storefront + admin, with working cart, filtering, and interactive product management.
+- **Phase 2 — Commerce logic** ✅ — real email/password auth with secure sessions, Stripe checkout, order persistence (Postgres via Prisma), and Resend order-confirmation emails. **Needs a one-time setup — see [SETUP.md](SETUP.md).**
+- **Phase 3 — Live backend** — connect the admin dashboard to the database so product / inventory / order / banner changes persist.
+
+## Activating Phase 2
+
+Real payments, login, and emails require a database + a few free service accounts (Neon, Stripe, Resend). The code is done — follow **[SETUP.md](SETUP.md)** to add your keys and switch it on.
 
 ---
 

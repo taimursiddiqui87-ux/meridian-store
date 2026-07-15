@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff, Apple, Chrome } from "lucide-react";
+import { useFormState } from "react-dom";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { SubmitButton } from "@/components/ui/SubmitButton";
+import { loginAction, type AuthState } from "@/app/actions/auth";
 import { img } from "@/lib/data";
 
 export default function LoginPage() {
   const [show, setShow] = useState(false);
+  const [state, formAction] = useFormState<AuthState, FormData>(loginAction, {});
 
   return (
     <AuthShell
@@ -17,23 +21,17 @@ export default function LoginPage() {
       <h1 className="font-serif text-4xl">Welcome back</h1>
       <p className="mt-2 text-sm text-ink-muted">Sign in to your Meridian account.</p>
 
-      <div className="mt-8 grid grid-cols-2 gap-3">
-        <button className="btn border border-stone-300 py-3 text-sm hover:bg-cream">
-          <Apple size={17} /> Apple
-        </button>
-        <button className="btn border border-stone-300 py-3 text-sm hover:bg-cream">
-          <Chrome size={17} /> Google
-        </button>
-      </div>
+      {state.error && (
+        <div className="mt-6 flex items-start gap-2 border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          {state.error}
+        </div>
+      )}
 
-      <div className="my-6 flex items-center gap-4 text-[11px] uppercase tracking-wider2 text-stone-400">
-        <span className="h-px flex-1 bg-stone-200" /> or <span className="h-px flex-1 bg-stone-200" />
-      </div>
-
-      <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+      <form action={formAction} className="mt-6 space-y-4">
         <div>
           <label className="field-label">Email</label>
-          <input type="email" required placeholder="you@email.com" className="field-input" />
+          <input type="email" name="email" required placeholder="you@email.com" className="field-input" />
         </div>
         <div>
           <div className="mb-2 flex items-center justify-between">
@@ -45,6 +43,7 @@ export default function LoginPage() {
           <div className="relative">
             <input
               type={show ? "text" : "password"}
+              name="password"
               required
               placeholder="••••••••"
               className="field-input pr-11"
@@ -60,11 +59,9 @@ export default function LoginPage() {
           </div>
         </div>
         <label className="flex items-center gap-2 text-[13px] text-ink-muted">
-          <input type="checkbox" className="h-4 w-4 accent-ink" /> Keep me signed in
+          <input type="checkbox" name="remember" className="h-4 w-4 accent-ink" /> Keep me signed in
         </label>
-        <button type="submit" className="btn-primary w-full">
-          Sign in
-        </button>
+        <SubmitButton pendingText="Signing in…">Sign in</SubmitButton>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-muted">

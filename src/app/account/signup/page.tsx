@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Eye, EyeOff, Check } from "lucide-react";
+import { useFormState } from "react-dom";
+import { Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { SubmitButton } from "@/components/ui/SubmitButton";
+import { signupAction, type AuthState } from "@/app/actions/auth";
 import { img } from "@/lib/data";
 
 export default function SignupPage() {
   const [show, setShow] = useState(false);
+  const [state, formAction] = useFormState<AuthState, FormData>(signupAction, {});
 
   return (
     <AuthShell
@@ -16,30 +20,39 @@ export default function SignupPage() {
     >
       <h1 className="font-serif text-4xl">Create your account</h1>
       <p className="mt-2 text-sm text-ink-muted">
-        Join for early access, order tracking and 10% off your first order.
+        Join for order tracking, faster checkout and member releases.
       </p>
 
-      <form onSubmit={(e) => e.preventDefault()} className="mt-8 space-y-4">
+      {state.error && (
+        <div className="mt-6 flex items-start gap-2 border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          {state.error}
+        </div>
+      )}
+
+      <form action={formAction} className="mt-6 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="field-label">First name</label>
-            <input required placeholder="First" className="field-input" />
+            <input name="firstName" required placeholder="First" className="field-input" />
           </div>
           <div>
             <label className="field-label">Last name</label>
-            <input required placeholder="Last" className="field-input" />
+            <input name="lastName" required placeholder="Last" className="field-input" />
           </div>
         </div>
         <div>
           <label className="field-label">Email</label>
-          <input type="email" required placeholder="you@email.com" className="field-input" />
+          <input type="email" name="email" required placeholder="you@email.com" className="field-input" />
         </div>
         <div>
           <label className="field-label">Password</label>
           <div className="relative">
             <input
               type={show ? "text" : "password"}
+              name="password"
               required
+              minLength={8}
               placeholder="Create a password"
               className="field-input pr-11"
             />
@@ -58,23 +71,15 @@ export default function SignupPage() {
           <input type="checkbox" required className="mt-0.5 h-4 w-4 accent-ink" />
           <span>
             I agree to the{" "}
-            <Link href="/terms" className="text-ink link-underline">
-              Terms
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-ink link-underline">
-              Privacy Policy
-            </Link>
-            .
+            <Link href="/terms" className="text-ink link-underline">Terms</Link> and{" "}
+            <Link href="/privacy" className="text-ink link-underline">Privacy Policy</Link>.
           </span>
         </label>
-        <button type="submit" className="btn-primary w-full">
-          Create account
-        </button>
+        <SubmitButton pendingText="Creating account…">Create account</SubmitButton>
       </form>
 
       <div className="mt-6 space-y-2">
-        {["Free worldwide shipping", "Complimentary engraving", "Exclusive member releases"].map((b) => (
+        {["Free worldwide shipping", "Order tracking & history", "Exclusive member releases"].map((b) => (
           <p key={b} className="flex items-center gap-2 text-[13px] text-ink-muted">
             <Check size={15} className="text-success" /> {b}
           </p>

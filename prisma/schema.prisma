@@ -1,0 +1,54 @@
+// MERIDIAN — data model (Phase 2)
+// Uses Postgres. Set DATABASE_URL in .env.local (see .env.example / SETUP.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  email           String
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  status          String      @default("pending") // pending | paid | fulfilled | cancelled
+  currency        String      @default("usd")
+  subtotal        Int // integer cents
+  shipping        Int         @default(0)
+  tax             Int         @default(0)
+  total           Int
+  stripeSessionId String?     @unique
+  customerName    String?
+  shippingAddress String?
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([email])
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  name      String
+  variant   String
+  price     Int // integer cents
+  quantity  Int
+  image     String
+}

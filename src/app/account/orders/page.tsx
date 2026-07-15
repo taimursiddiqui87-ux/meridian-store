@@ -1,109 +1,93 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Package, User, MapPin, Heart, LogOut, ChevronRight } from "lucide-react";
-import { img, BRAND } from "@/lib/data";
+import { redirect } from "next/navigation";
+import { Package } from "lucide-react";
+import type { Order, OrderItem } from "@prisma/client";
+import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { AccountSidebar } from "@/components/account/AccountSidebar";
+import { OrderStatusPill } from "@/components/account/OrderStatusPill";
 
-const sampleOrders = [
-  {
-    no: "MER-10462",
-    date: "July 2, 2026",
-    status: "Delivered",
-    tone: "text-success bg-success/10",
-    total: 129000,
-    items: [{ name: "Aera 39", variant: "Midnight Blue", qty: 1, image: img("1523275335684-37898b6baf30", 300) }],
-  },
-  {
-    no: "MER-10455",
-    date: "June 20, 2026",
-    status: "In transit",
-    tone: "text-brass-700 bg-brass-100",
-    total: 168000,
-    items: [{ name: "Noir Chronograph", variant: "Matte Black", qty: 1, image: img("1611591437281-460bfbe1220a", 300) }],
-  },
-];
+export const dynamic = "force-dynamic";
 
-const menu = [
-  { label: "Orders", icon: Package, active: true },
-  { label: "Profile", icon: User },
-  { label: "Addresses", icon: MapPin },
-  { label: "Wishlist", icon: Heart },
-];
+export default async function OrdersPage() {
+  const session = await getSession();
+  if (!session) redirect("/account/login");
 
-export default function OrdersPage() {
+  let orders: (Order & { items: OrderItem[] })[] = [];
+  try {
+    orders = await prisma.order.findMany({
+      where: { userId: session.id },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    orders = [];
+  }
+
   return (
     <div className="container-luxe py-10 lg:py-14">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Account" }, { label: "Orders" }]} />
+      <Breadcrumbs
+        items={[{ label: "Home", href: "/" }, { label: "Account", href: "/account" }, { label: "Orders" }]}
+      />
       <h1 className="mt-4 font-serif text-4xl sm:text-5xl">Your Orders</h1>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[220px_1fr]">
         <aside>
-          <div className="border border-stone-200 p-2">
-            {menu.map((m) => (
-              <button
-                key={m.label}
-                className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition-colors ${
-                  m.active ? "bg-ink text-paper" : "text-ink-soft hover:bg-cream"
-                }`}
-              >
-                <m.icon size={17} strokeWidth={1.5} /> {m.label}
-              </button>
-            ))}
-            <button className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-ink-muted hover:bg-cream">
-              <LogOut size={17} strokeWidth={1.5} /> Sign out
-            </button>
-          </div>
+          <AccountSidebar active="Orders" />
         </aside>
 
         <div className="space-y-5">
-          {sampleOrders.map((o) => (
-            <div key={o.no} className="border border-stone-200">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 bg-cream/40 px-6 py-4">
-                <div className="flex flex-wrap items-center gap-x-8 gap-y-1 text-sm">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Order</p>
-                    <p className="font-medium">#{o.no}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Placed</p>
-                    <p>{o.date}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Total</p>
-                    <p className="tabular-nums">{formatPrice(o.total)}</p>
-                  </div>
-                </div>
-                <span className={`px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider ${o.tone}`}>
-                  {o.status}
-                </span>
-              </div>
-              <div className="flex items-center gap-4 px-6 py-5">
-                <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-cream">
-                  <Image src={o.items[0].image} alt="" fill sizes="64px" className="object-cover" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-serif text-xl">{o.items[0].name}</p>
-                  <p className="text-[13px] text-stone-400">
-                    {o.items[0].variant} · Qty {o.items[0].qty}
-                  </p>
-                </div>
-                <Link
-                  href="#"
-                  className="flex items-center gap-1 text-[12px] uppercase tracking-wider2 text-ink hover:text-brass-600"
-                >
-                  Track <ChevronRight size={14} />
-                </Link>
+          {orders.length === 0 ? (
+            <div className="grid place-items-center border border-dashed border-stone-300 py-20 text-center">
+              <div>
+                <Package size={30} className="mx-auto mb-3 text-stone-300" />
+                <p className="font-serif text-2xl">No orders yet</p>
+                <p className="mt-1 text-sm text-ink-muted">When you place an order, it will appear here.</p>
+                <Link href="/shop" className="btn-primary mt-6">Browse the collection</Link>
               </div>
             </div>
-          ))}
-
-          <p className="pt-2 text-center text-sm text-ink-muted">
-            Need help with an order?{" "}
-            <Link href="/contact" className="text-ink link-underline">
-              Contact {BRAND.name} care
-            </Link>
-          </p>
+          ) : (
+            orders.map((o) => (
+              <div key={o.id} className="border border-stone-200">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 bg-cream/40 px-6 py-4">
+                  <div className="flex flex-wrap items-center gap-x-8 gap-y-1 text-sm">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Order</p>
+                      <p className="font-medium">#{o.orderNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Placed</p>
+                      <p>{new Date(o.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Total</p>
+                      <p className="tabular-nums">{formatPrice(o.total)}</p>
+                    </div>
+                  </div>
+                  <OrderStatusPill status={o.status} />
+                </div>
+                <ul className="divide-y divide-stone-50">
+                  {o.items.map((item) => (
+                    <li key={item.id} className="flex items-center gap-4 px-6 py-4">
+                      <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-cream">
+                        <Image src={item.image} alt="" fill sizes="64px" className="object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-serif text-lg">{item.name}</p>
+                        <p className="text-[13px] text-stone-400">
+                          {item.variant} · Qty {item.quantity}
+                        </p>
+                      </div>
+                      <span className="text-sm tabular-nums">{formatPrice(item.price * item.quantity)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

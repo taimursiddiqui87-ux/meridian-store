@@ -4,10 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, User, ShoppingBag, Menu, X, ChevronRight } from "lucide-react";
+import { Search, User, ShoppingBag, Menu, X, ChevronRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND, products } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
+import { logoutAction } from "@/app/actions/auth";
 
 const nav = [
   { label: "Watches", href: "/shop", mega: true },
@@ -24,6 +25,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [user, setUser] = useState<{ name?: string | null; email?: string } | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -35,6 +37,19 @@ export function Header() {
   useEffect(() => {
     setMenuOpen(false);
     setSearchOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (active) setUser(d.user);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [pathname]);
 
   useEffect(() => {
@@ -160,11 +175,14 @@ export function Header() {
               <Search size={19} strokeWidth={1.5} />
             </button>
             <Link
-              href="/account/login"
-              aria-label="Account"
-              className="hidden h-10 w-10 place-items-center text-ink transition-colors hover:text-brass-600 sm:grid"
+              href={user ? "/account" : "/account/login"}
+              aria-label={user ? "Your account" : "Sign in"}
+              className="relative hidden h-10 w-10 place-items-center text-ink transition-colors hover:text-brass-600 sm:grid"
             >
               <User size={19} strokeWidth={1.5} />
+              {user && (
+                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brass-500 ring-2 ring-paper" />
+              )}
             </Link>
             <button
               type="button"
@@ -251,12 +269,34 @@ export function Header() {
             ))}
           </nav>
           <div className="px-5 py-4">
-            <Link
-              href="/account/login"
-              className="flex items-center gap-3 py-3 text-sm uppercase tracking-wider2 text-ink-muted"
-            >
-              <User size={18} /> Account
-            </Link>
+            {user ? (
+              <div className="space-y-1">
+                <p className="px-1 pb-2 text-[13px] text-ink-muted">
+                  Signed in as <span className="font-medium text-ink">{user.name || user.email}</span>
+                </p>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-3 py-3 text-sm uppercase tracking-wider2 text-ink-muted"
+                >
+                  <User size={18} /> My account
+                </Link>
+                <form action={logoutAction}>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-3 py-3 text-left text-sm uppercase tracking-wider2 text-ink-muted"
+                  >
+                    <LogOut size={18} /> Sign out
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <Link
+                href="/account/login"
+                className="flex items-center gap-3 py-3 text-sm uppercase tracking-wider2 text-ink-muted"
+              >
+                <User size={18} /> Sign in
+              </Link>
+            )}
           </div>
         </div>
       </div>
