@@ -28,7 +28,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="The Collections"
             title="Three houses, one standard"
-            subtitle="It begins with watches. This year, Meridian expands into eyewear and leather goods — each held to the same obsessive finish."
+            subtitle="It begins with watches. This year, Meridian expands into perfumes and jewelry — each held to the same obsessive finish."
           />
         </Reveal>
         <Reveal className="mt-12" delay={80}>

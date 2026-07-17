@@ -16,7 +16,7 @@ export default function LoginPage() {
   return (
     <AuthShell
       image={img("1539874754764-5a96559165b0", 1200)}
-      quote="A watch is the only jewellery a man truly needs."
+      quote="Time is the ultimate luxury — wear it well."
     >
       <h1 className="font-serif text-4xl">Welcome back</h1>
       <p className="mt-2 text-sm text-ink-muted">Sign in to your Meridian account.</p>

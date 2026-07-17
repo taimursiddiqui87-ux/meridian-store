@@ -12,8 +12,8 @@ import { logoutAction } from "@/app/actions/auth";
 
 const nav = [
   { label: "Watches", href: "/shop", mega: true },
-  { label: "Eyewear", href: "/category/eyewear", soon: true },
-  { label: "Leather Goods", href: "/category/leather-goods", soon: true },
+  { label: "Perfumes", href: "/category/perfumes", soon: true },
+  { label: "Jewelry", href: "/category/jewelry", soon: true },
   { label: "Our Story", href: "/about" },
 ];
 

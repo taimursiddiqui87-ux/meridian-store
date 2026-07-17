@@ -40,22 +40,22 @@ export const categories: Category[] = [
     status: "live",
   },
   {
-    slug: "eyewear",
-    name: "Eyewear",
-    tagline: "Handcrafted acetate & titanium",
+    slug: "perfumes",
+    name: "Perfumes",
+    tagline: "Hand-blended extraits de parfum",
     description:
-      "Optical-grade lenses and Italian acetate frames. Precision you can see through.",
-    image: img("1572635196237-14b3f281503f", 1200),
+      "Small-batch extraits built on amber, oud and cedar — blended by hand and bottled in weighted glass to linger like memory.",
+    image: img("1615634260167-c8cdede054de", 1200),
     status: "coming-soon",
     launch: "Autumn 2026",
   },
   {
-    slug: "leather-goods",
-    name: "Leather Goods",
-    tagline: "Full-grain, vegetable-tanned",
+    slug: "jewelry",
+    name: "Jewelry",
+    tagline: "Recycled gold & sterling silver",
     description:
-      "Wallets, straps and travel pieces cut from full-grain leather that ages beautifully.",
-    image: img("1553062407-98eeb64c6a62", 1200),
+      "Everyday essentials in recycled 14k gold and sterling silver — hand-finished pieces made to be worn daily and handed down.",
+    image: img("1573408301185-9146fe634ad0", 1200),
     status: "coming-soon",
     launch: "Winter 2026",
   },
@@ -352,16 +352,28 @@ export const heroBanners: HeroBanner[] = [
     secondaryCta: { label: "View Collection", href: "/shop" },
   },
   {
-    id: "hero-eyewear",
+    id: "hero-perfumes",
     eyebrow: "Coming Autumn 2026",
-    title: "A new way to see",
+    title: "A signature you can't see",
     subtitle:
-      "Meridian Eyewear arrives this autumn — handcrafted acetate, optical-grade lenses. Join the list first.",
-    image: img("1572635196237-14b3f281503f", 2000),
+      "Meridian Perfumes arrives this autumn — small-batch extraits de parfum, blended by hand. Join the list to be first.",
+    image: img("1541643600914-78b084683601", 2000),
     align: "left",
     theme: "dark",
-    primaryCta: { label: "Get Early Access", href: "/category/eyewear" },
-    secondaryCta: { label: "Explore the Vision", href: "/category/eyewear" },
+    primaryCta: { label: "Get Early Access", href: "/category/perfumes" },
+    secondaryCta: { label: "Discover Perfumes", href: "/category/perfumes" },
+  },
+  {
+    id: "hero-jewelry",
+    eyebrow: "Coming Winter 2026",
+    title: "Worn close, kept forever",
+    subtitle:
+      "Meridian Jewelry — recycled gold and sterling essentials, finished by hand. Be first in line for the launch.",
+    image: img("1515562141207-7a88fb7ce338", 2000),
+    align: "center",
+    theme: "dark",
+    primaryCta: { label: "Get Early Access", href: "/category/jewelry" },
+    secondaryCta: { label: "See the Collection", href: "/category/jewelry" },
   },
 ];
 
@@ -429,9 +441,9 @@ export const marqueeItems = [
 
 export const instagramImages = [
   img("1523275335684-37898b6baf30", 600),
-  img("1539874754764-5a96559165b0", 600),
+  img("1592945403244-b3fbafd7f539", 600), // perfume
   img("1611591437281-460bfbe1220a", 600),
-  img("1594534475808-b18fc33b045e", 600),
+  img("1535632066927-ab7c9ab60908", 600), // jewelry
   img("1524592094714-0f0654e20314", 600),
   img("1587836374828-4dbafa94cf0e", 600),
 ];

@@ -9,8 +9,8 @@ const columns = [
       { label: "All Watches", href: "/shop" },
       { label: "Bestsellers", href: "/shop?sort=popular" },
       { label: "New Arrivals", href: "/shop?sort=new" },
-      { label: "Eyewear — Soon", href: "/category/eyewear" },
-      { label: "Leather Goods — Soon", href: "/category/leather-goods" },
+      { label: "Perfumes — Soon", href: "/category/perfumes" },
+      { label: "Jewelry — Soon", href: "/category/jewelry" },
     ],
   },
   {

@@ -2,7 +2,7 @@
 
 **Live demo:** [meridian-store-beige.vercel.app](https://meridian-store-beige.vercel.app) · **Admin:** [/admin](https://meridian-store-beige.vercel.app/admin) · **Repo:** [taimursiddiqui87-ux/meridian-store](https://github.com/taimursiddiqui87-ux/meridian-store)
 
-A Shopify-style storefront **and** admin backend for a premium watch brand, built to expand into two upcoming product lines (Eyewear, Leather Goods).
+A Shopify-style storefront **and** admin backend for a premium watch brand, built to expand into two upcoming product lines (Perfumes, Jewelry).
 
 Built with **Next.js 14 (App Router)**, **TypeScript**, and **Tailwind CSS** — one codebase serves both the customer-facing storefront and the admin dashboard.
 
@@ -35,7 +35,7 @@ npm run start   # serve the production build
 | `/` | Homepage — **multi-banner hero carousel**, trust bar, category showcase, bestsellers, promo banners, new arrivals, brand story, reviews, Instagram grid |
 | `/shop` | Product listing with **filters** (collection, price, availability), **sort**, and search |
 | `/product/[slug]` | Product detail — image gallery, variants, quantity, add-to-cart, spec accordions, related products |
-| `/category/[slug]` | "Coming Soon" pages for upcoming lines (Eyewear, Leather Goods) with notify-me capture |
+| `/category/[slug]` | "Coming Soon" pages for upcoming lines (Perfumes, Jewelry) with notify-me capture |
 | `/cart` | Full cart page + a slide-out cart drawer available site-wide |
 | `/checkout` | Multi-step checkout (contact → shipping → delivery → payment) with **order confirmation + email message** |
 | `/account/login`, `/account/signup` | Auth screens |
