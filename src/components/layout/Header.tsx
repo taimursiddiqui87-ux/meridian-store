@@ -10,12 +10,16 @@ import { BRAND, products } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 import { logoutAction } from "@/app/actions/auth";
 
-const nav = [
-  { label: "Watches", href: "/shop", mega: true },
-  { label: "Perfumes", href: "/category/perfumes", soon: true },
-  { label: "Jewelry", href: "/category/jewelry", soon: true },
+type NavItem = { label: string; href: string; mega?: boolean; soon?: boolean };
+
+const nav: NavItem[] = [
+  { label: "Watches", href: "/category/watches", mega: true },
+  { label: "Perfumes", href: "/category/perfumes" },
+  { label: "Jewelry", href: "/category/jewelry" },
   { label: "Our Story", href: "/about" },
 ];
+
+const watchCatalog = products.filter((p) => p.category === "watches");
 
 export function Header() {
   const { count, openCart } = useCart();
@@ -106,7 +110,7 @@ export function Header() {
                         <div>
                           <p className="label-caps mb-4 text-stone-400">Collections</p>
                           <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                            {products.map((p) => (
+                            {watchCatalog.map((p) => (
                               <Link
                                 key={p.id}
                                 href={`/product/${p.slug}`}
@@ -121,16 +125,16 @@ export function Header() {
                             ))}
                           </div>
                           <Link
-                            href="/shop"
+                            href="/category/watches"
                             className="mt-5 inline-block text-[12px] font-medium uppercase tracking-wider2 text-brass-600 link-underline"
                           >
                             View all watches
                           </Link>
                         </div>
-                        <Link href={`/product/${products[0].slug}`} className="group/feat relative block overflow-hidden bg-cream">
+                        <Link href={`/product/${watchCatalog[0].slug}`} className="group/feat relative block overflow-hidden bg-cream">
                           <Image
-                            src={products[0].images[0]}
-                            alt={products[0].name}
+                            src={watchCatalog[0].images[0]}
+                            alt={watchCatalog[0].name}
                             width={320}
                             height={360}
                             className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover/feat:scale-105"
@@ -139,7 +143,7 @@ export function Header() {
                             <p className="text-[10px] uppercase tracking-wider2 text-brass-300">
                               Bestseller
                             </p>
-                            <p className="font-serif text-lg text-paper">{products[0].name}</p>
+                            <p className="font-serif text-lg text-paper">{watchCatalog[0].name}</p>
                           </div>
                         </Link>
                       </div>
@@ -214,7 +218,7 @@ export function Header() {
             autoFocus={searchOpen}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search timepieces, collections…"
+            placeholder="Search watches, perfumes, jewelry…"
             className="flex-1 bg-transparent text-base outline-none placeholder:text-stone-400"
           />
           <button type="submit" className="text-[12px] font-medium uppercase tracking-wider2 text-brass-600">

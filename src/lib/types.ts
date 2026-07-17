@@ -30,6 +30,8 @@ export interface Product {
   compareAtPrice?: number; // integer cents (original price when on sale)
   currency: string;
   collection: string;
+  /** Label for the variant picker, e.g. "Finish", "Size", "Metal". Defaults to "Finish". */
+  variantLabel?: string;
   shortDescription: string;
   description: string;
   images: string[];

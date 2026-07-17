@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 function CategoryCard({ category, big }: { category: Category; big?: boolean }) {
   const live = category.status === "live";
-  const href = live ? "/shop" : `/category/${category.slug}`;
+  const href = `/category/${category.slug}`;
 
   return (
     <Link

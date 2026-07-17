@@ -12,8 +12,10 @@ import {
   RefreshCw,
   Check,
   ChevronDown,
+  Gift,
 } from "lucide-react";
 import type { Product } from "@/lib/types";
+import { getCategory } from "@/lib/data";
 import { cn, formatPrice } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { Stars } from "@/components/ui/Stars";
@@ -25,6 +27,21 @@ export function ProductDetail({ product }: { product: Product }) {
   const [variant, setVariant] = useState(product.variants[0]);
   const [qty, setQty] = useState(1);
   const onSale = !!product.compareAtPrice && product.compareAtPrice > product.price;
+  const category = getCategory(product.category);
+  const trustItems =
+    product.category === "perfumes"
+      ? [
+          { icon: Truck, label: "Free shipping" },
+          { icon: ShieldCheck, label: "Sealed & authentic" },
+          { icon: Gift, label: "Samples included" },
+          { icon: RefreshCw, label: "30-day returns" },
+        ]
+      : [
+          { icon: Truck, label: "Free shipping" },
+          { icon: ShieldCheck, label: "2-yr warranty" },
+          { icon: PenLine, label: "Free engraving" },
+          { icon: RefreshCw, label: "30-day returns" },
+        ];
 
   const handleAdd = (thenCheckout = false) => {
     add(
@@ -46,7 +63,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
-          { label: "Watches", href: "/shop" },
+          { label: category?.name ?? "Shop", href: `/category/${product.category}` },
           { label: product.name },
         ]}
       />
@@ -116,7 +133,9 @@ export function ProductDetail({ product }: { product: Product }) {
           {/* Variants */}
           <div className="mt-8">
             <p className="mb-3 text-[13px]">
-              <span className="uppercase tracking-wider2 text-ink-muted">Finish:</span>{" "}
+              <span className="uppercase tracking-wider2 text-ink-muted">
+                {product.variantLabel ?? "Finish"}:
+              </span>{" "}
               <span className="text-ink">{variant?.name}</span>
             </p>
             <div className="flex flex-wrap gap-3">
@@ -177,12 +196,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
           {/* Trust */}
           <div className="mt-8 grid grid-cols-2 gap-4 border-y border-stone-200 py-6 sm:grid-cols-4">
-            {[
-              { icon: Truck, label: "Free shipping" },
-              { icon: ShieldCheck, label: "2-yr warranty" },
-              { icon: PenLine, label: "Free engraving" },
-              { icon: RefreshCw, label: "30-day returns" },
-            ].map((t) => (
+            {trustItems.map((t) => (
               <div key={t.label} className="flex flex-col items-center gap-2 text-center">
                 <t.icon size={20} strokeWidth={1.4} className="text-brass-600" />
                 <span className="text-[11px] uppercase tracking-wide text-ink-muted">{t.label}</span>

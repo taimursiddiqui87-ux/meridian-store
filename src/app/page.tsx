@@ -11,12 +11,16 @@ import { Reveal } from "@/components/ui/Reveal";
 import {
   heroBanners,
   categories,
-  products,
   promoBanners,
   testimonials,
+  getProductsByCategory,
 } from "@/lib/data";
 
 export default function Home() {
+  const watches = getProductsByCategory("watches");
+  const perfumes = getProductsByCategory("perfumes");
+  const jewelry = getProductsByCategory("jewelry");
+
   return (
     <>
       <HeroCarousel banners={heroBanners} />
@@ -28,7 +32,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="The Collections"
             title="Three houses, one standard"
-            subtitle="It begins with watches. This year, Meridian expands into perfumes and jewelry — each held to the same obsessive finish."
+            subtitle="Watches, perfumes and jewelry — three collections held to one obsessive standard of finish."
           />
         </Reveal>
         <Reveal className="mt-12" delay={80}>
@@ -36,17 +40,17 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* Bestsellers */}
+      {/* Watches */}
       <section className="container-luxe pb-8">
         <Reveal>
           <SectionHeading
             eyebrow="The Signature Edit"
             title="Bestselling timepieces"
-            cta={{ label: "Shop all watches", href: "/shop" }}
+            cta={{ label: "Shop watches", href: "/category/watches" }}
           />
         </Reveal>
         <Reveal className="mt-12" delay={80}>
-          <ProductGrid products={products.slice(0, 4)} />
+          <ProductGrid products={watches.slice(0, 4)} />
         </Reveal>
       </section>
 
@@ -57,23 +61,39 @@ export default function Home() {
         </Reveal>
       </section>
 
-      {/* New arrivals */}
-      <section className="container-luxe pb-8">
+      {/* Perfumes */}
+      <section className="bg-cream/60 py-20 lg:py-24">
+        <div className="container-luxe">
+          <Reveal>
+            <SectionHeading
+              eyebrow="Just Launched · Grasse, France"
+              title="The Perfume Collection"
+              subtitle="Six extraits de parfum in weighted glass — worn in whispers, remembered for hours."
+              cta={{ label: "Shop perfumes", href: "/category/perfumes" }}
+            />
+          </Reveal>
+          <Reveal className="mt-12" delay={80}>
+            <ProductGrid products={perfumes.slice(0, 4)} />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Jewelry */}
+      <section className="container-luxe py-20 lg:py-24">
         <Reveal>
           <SectionHeading
-            eyebrow="New This Season"
-            title="Just landed"
-            cta={{ label: "View new arrivals", href: "/shop?sort=new" }}
+            eyebrow="Just Launched · Vicenza, Italy"
+            title="The Jewelry Collection"
+            subtitle="Recycled gold and sterling essentials, hand-finished and made to be handed down."
+            cta={{ label: "Shop jewelry", href: "/category/jewelry" }}
           />
         </Reveal>
         <Reveal className="mt-12" delay={80}>
-          <ProductGrid products={products.slice(4, 8)} />
+          <ProductGrid products={jewelry.slice(0, 4)} />
         </Reveal>
       </section>
 
-      <div className="mt-12">
-        <BrandStory />
-      </div>
+      <BrandStory />
 
       {/* Promo — craft */}
       <section className="container-luxe py-16 lg:py-20">

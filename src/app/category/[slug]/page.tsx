@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
-import { getCategory, categories } from "@/lib/data";
+import { notFound } from "next/navigation";
+import {
+  getCategory,
+  getProductsByCategory,
+  categories,
+  categoryEditorial,
+  collectionLabels,
+} from "@/lib/data";
 import { ComingSoon } from "@/components/category/ComingSoon";
+import { CategoryHero } from "@/components/category/CategoryHero";
+import { ProductListing } from "@/components/shop/ProductListing";
+import { PromoSplit } from "@/components/home/PromoSplit";
+import { Reveal } from "@/components/ui/Reveal";
 
 export function generateStaticParams() {
   return categories.map((c) => ({ slug: c.slug }));
@@ -20,8 +30,30 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
   const category = getCategory(params.slug);
   if (!category) notFound();
 
-  // Live categories route to the shop grid.
-  if (category.status === "live") redirect("/shop");
+  // Future lines can still tease before launch.
+  if (category.status === "coming-soon") return <ComingSoon category={category} />;
 
-  return <ComingSoon category={category} />;
+  const items = getProductsByCategory(category.slug);
+  const editorial = categoryEditorial[category.slug];
+
+  return (
+    <>
+      <CategoryHero category={category} count={items.length} />
+
+      <div className="container-luxe py-10">
+        <ProductListing
+          products={items}
+          collectionLabel={collectionLabels[category.slug] ?? "Collection"}
+        />
+      </div>
+
+      {editorial && (
+        <section className="container-luxe pb-20 pt-6">
+          <Reveal>
+            <PromoSplit promo={editorial} reverse={category.slug === "jewelry"} />
+          </Reveal>
+        </section>
+      )}
+    </>
+  );
 }

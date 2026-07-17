@@ -37,7 +37,7 @@ export default function AdminContentPage() {
                     <p className="truncate font-medium text-ink">{b.title}</p>
                     <p className="truncate text-[12px] text-stone-400">{b.eyebrow}</p>
                   </div>
-                  <Pill status={i === 2 ? "Draft" : "Active"} />
+                  <Pill status="Active" />
                   <div className="flex items-center gap-1">
                     <button className="grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100 hover:text-ink">
                       <Pencil size={15} />

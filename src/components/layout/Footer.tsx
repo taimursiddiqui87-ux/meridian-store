@@ -6,11 +6,11 @@ const columns = [
   {
     title: "Shop",
     links: [
-      { label: "All Watches", href: "/shop" },
-      { label: "Bestsellers", href: "/shop?sort=popular" },
+      { label: "Shop All", href: "/shop" },
+      { label: "Watches", href: "/category/watches" },
+      { label: "Perfumes", href: "/category/perfumes" },
+      { label: "Jewelry", href: "/category/jewelry" },
       { label: "New Arrivals", href: "/shop?sort=new" },
-      { label: "Perfumes — Soon", href: "/category/perfumes" },
-      { label: "Jewelry — Soon", href: "/category/jewelry" },
     ],
   },
   {

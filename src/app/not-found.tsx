@@ -14,7 +14,7 @@ export default function NotFound() {
             Back home
           </Link>
           <Link href="/shop" className="btn-outline">
-            Shop watches
+            Shop the store
           </Link>
         </div>
       </div>

@@ -44,20 +44,18 @@ export const categories: Category[] = [
     name: "Perfumes",
     tagline: "Hand-blended extraits de parfum",
     description:
-      "Small-batch extraits built on amber, oud and cedar — blended by hand and bottled in weighted glass to linger like memory.",
+      "Small-batch extraits built on amber, oud and cedar — blended by hand in Grasse and bottled in weighted glass to linger like memory.",
     image: img("1615634260167-c8cdede054de", 1200),
-    status: "coming-soon",
-    launch: "Autumn 2026",
+    status: "live",
   },
   {
     slug: "jewelry",
     name: "Jewelry",
     tagline: "Recycled gold & sterling silver",
     description:
-      "Everyday essentials in recycled 14k gold and sterling silver — hand-finished pieces made to be worn daily and handed down.",
+      "Everyday essentials in recycled 14k gold and sterling silver — hand-finished in Vicenza and made to be handed down.",
     image: img("1573408301185-9146fe634ad0", 1200),
-    status: "coming-soon",
-    launch: "Winter 2026",
+    status: "live",
   },
 ];
 
@@ -71,6 +69,26 @@ const baseSpecs = (over: Partial<Record<string, string>> = {}) => [
   { label: "Crystal", value: over.crystal ?? "Anti-reflective sapphire" },
   { label: "Water resistance", value: over.water ?? "100m / 10 ATM" },
   { label: "Strap", value: over.strap ?? "Italian leather, quick-release" },
+  { label: "Warranty", value: "2-year international" },
+];
+
+const perfumeSpecs = (o: { top: string; heart: string; base: string; conc?: string }) => [
+  { label: "Concentration", value: o.conc ?? "Extrait de parfum · 28%" },
+  { label: "Size", value: "50 ml / 1.7 fl oz" },
+  { label: "Top notes", value: o.top },
+  { label: "Heart notes", value: o.heart },
+  { label: "Base notes", value: o.base },
+  { label: "Longevity", value: "10–12 hours on skin" },
+  { label: "Origin", value: "Composed & bottled in Grasse, France" },
+];
+
+const jewelrySpecs = (o: { material: string; stone?: string; dims: string; fit?: string }) => [
+  { label: "Material", value: o.material },
+  ...(o.stone ? [{ label: "Stone", value: o.stone }] : []),
+  { label: "Dimensions", value: o.dims },
+  ...(o.fit ? [{ label: "Fit", value: o.fit }] : []),
+  { label: "Care", value: "Polishing cloth included" },
+  { label: "Origin", value: "Handmade in Vicenza, Italy" },
   { label: "Warranty", value: "2-year international" },
 ];
 
@@ -320,6 +338,418 @@ export const products: Product[] = [
     stock: 18,
     sku: "MER-AUR-39-TT",
   },
+
+  /* ---------------- Perfumes ---------------- */
+
+  {
+    id: "p-ambre",
+    slug: "ambre-meridien",
+    name: "Ambre Méridien",
+    category: "perfumes",
+    price: 18500,
+    currency: "USD",
+    collection: "Ambrée",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Amber, saffron & cedar",
+    description:
+      "Our signature scent. Saffron and bergamot open onto a heart of labdanum and rose, resting on a base of warm amber, cedar and skin musk. Composed in Grasse and macerated for six weeks, it wears close — a scent for the person beside you, not the room.",
+    images: [img("1615634260167-c8cdede054de"), img("1587017539504-67cfbddac569"), img("1592945403244-b3fbafd7f539")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#A66A2E" }],
+    specs: perfumeSpecs({
+      top: "Saffron, bergamot",
+      heart: "Labdanum, Rose de Mai",
+      base: "Amber, Atlas cedar, musk",
+    }),
+    features: [
+      "Small-batch extrait, numbered bottle",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 4.9,
+    reviewCount: 87,
+    badge: "Bestseller",
+    inStock: true,
+    stock: 42,
+    sku: "MER-PF-AMB-50",
+    isBestseller: true,
+  },
+  {
+    id: "p-lumiere",
+    slug: "premiere-lumiere",
+    name: "Première Lumière",
+    category: "perfumes",
+    price: 14500,
+    currency: "USD",
+    collection: "Fraîche",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Neroli & white tea",
+    description:
+      "Morning, bottled. Tunisian neroli and cold bergamot lift into white tea and orange blossom, grounded by a whisper of white musk. Luminous without sweetness — the scent of pressed linen and open windows.",
+    images: [img("1541643600914-78b084683601"), img("1563170351-be82bc888aa4"), img("1594035910387-fea47794261f")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#E8D9A8" }],
+    specs: perfumeSpecs({
+      top: "Neroli, cold bergamot",
+      heart: "White tea, orange blossom",
+      base: "White musk, blond woods",
+    }),
+    features: [
+      "Small-batch extrait, numbered bottle",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 4.8,
+    reviewCount: 64,
+    inStock: true,
+    stock: 55,
+    sku: "MER-PF-LUM-50",
+  },
+  {
+    id: "p-minuit",
+    slug: "minuit-dore",
+    name: "Minuit Doré",
+    category: "perfumes",
+    price: 21000,
+    currency: "USD",
+    collection: "Ambrée",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Oud, vanilla & smoke",
+    description:
+      "The late hour. Smoked oud and black vanilla fold into incense and a trace of rum, finished with golden benzoin. Poured in our smallest batches and aged the longest — dense, quiet, unforgettable.",
+    images: [img("1588405748880-12d1d2a59f75"), img("1608528577891-eb055944f2e7"), img("1615634260167-c8cdede054de")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#6B4A1F" }],
+    specs: perfumeSpecs({
+      top: "Rum accord, pink pepper",
+      heart: "Smoked oud, incense",
+      base: "Black vanilla, benzoin",
+      conc: "Extrait de parfum · 30%",
+    }),
+    features: [
+      "Aged twelve weeks before bottling",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 5.0,
+    reviewCount: 41,
+    badge: "Limited",
+    inStock: true,
+    stock: 12,
+    sku: "MER-PF-MIN-50",
+  },
+  {
+    id: "p-jardin",
+    slug: "jardin-de-pierre",
+    name: "Jardin de Pierre",
+    category: "perfumes",
+    price: 16000,
+    currency: "USD",
+    collection: "Boisée",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Vetiver & fig leaf",
+    description:
+      "A stone garden after rain. Green fig leaf and crushed herbs over Haitian vetiver and stone pine, dried down with mineral ambergris. Cool, rooted and quietly architectural.",
+    images: [img("1585386959984-a4155224a1ad"), img("1523293182086-7651a899d37f"), img("1588405748880-12d1d2a59f75")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#7A7D4F" }],
+    specs: perfumeSpecs({
+      top: "Fig leaf, crushed herbs",
+      heart: "Haitian vetiver, stone pine",
+      base: "Ambergris accord, oakmoss",
+    }),
+    features: [
+      "Small-batch extrait, numbered bottle",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 4.7,
+    reviewCount: 52,
+    inStock: true,
+    stock: 31,
+    sku: "MER-PF-JAR-50",
+  },
+  {
+    id: "p-rose",
+    slug: "rose-infinie",
+    name: "Rose Infinie",
+    category: "perfumes",
+    price: 17500,
+    currency: "USD",
+    collection: "Florale",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Rose de Mai & suede",
+    description:
+      "A rose with its thorns kept on. Rose de Mai from Grasse is sharpened with pink pepper and lychee, then softened into suede and sandalwood. Romantic, but never naïve.",
+    images: [img("1594035910387-fea47794261f"), img("1592945403244-b3fbafd7f539"), img("1563170351-be82bc888aa4")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#D9A0A6" }],
+    specs: perfumeSpecs({
+      top: "Pink pepper, lychee",
+      heart: "Rose de Mai, peony",
+      base: "Suede accord, sandalwood",
+    }),
+    features: [
+      "Rose de Mai harvested in Grasse",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 4.8,
+    reviewCount: 38,
+    badge: "New",
+    inStock: true,
+    stock: 24,
+    sku: "MER-PF-ROS-50",
+    isNew: true,
+  },
+  {
+    id: "p-cuir",
+    slug: "cuir-celeste",
+    name: "Cuir Céleste",
+    category: "perfumes",
+    price: 23000,
+    currency: "USD",
+    collection: "Boisée",
+    variantLabel: "Size",
+    shortDescription: "Extrait · Leather, iris & tonka",
+    description:
+      "The scent of the watchmaker's bench — supple leather and cool iris warmed by tonka bean and a breath of hay. Our most tactile composition, built to age with you like a strap does.",
+    images: [img("1592945403244-b3fbafd7f539"), img("1523293182086-7651a899d37f"), img("1587017539504-67cfbddac569")],
+    variants: [{ id: "50ml", name: "50 ml · Extrait de Parfum", swatch: "#8A5A33" }],
+    specs: perfumeSpecs({
+      top: "Bergamot, hay",
+      heart: "Leather accord, orris butter",
+      base: "Tonka bean, vetiver",
+      conc: "Extrait de parfum · 30%",
+    }),
+    features: [
+      "Orris butter aged three years",
+      "Weighted glass flacon with brass cap",
+      "Two 2 ml travel sprays included",
+      "Recyclable glass, FSC-certified box",
+    ],
+    rating: 4.9,
+    reviewCount: 29,
+    inStock: true,
+    stock: 18,
+    sku: "MER-PF-CUI-50",
+  },
+
+  /* ---------------- Jewelry ---------------- */
+
+  {
+    id: "j-solstice",
+    slug: "solstice-band",
+    name: "Solstice Band",
+    category: "jewelry",
+    price: 32000,
+    currency: "USD",
+    collection: "Rings",
+    variantLabel: "Metal",
+    shortDescription: "Ring · Hand-forged 14k gold",
+    description:
+      "A ring with the weight of a promise. Hand-forged from recycled 14k gold and softly faceted so it catches low light the way a dial does. Worn alone or stacked — made to outlast trends and owners alike.",
+    images: [img("1611652022419-a9419f74343d"), img("1608042314453-ae338d80c427"), img("1603561591411-07134e71a2a9")],
+    variants: [
+      { id: "gold", name: "14k Gold", swatch: "#C9A24B" },
+      { id: "rosegold", name: "14k Rose Gold", swatch: "#B76E56" },
+      { id: "silver", name: "Sterling Silver", swatch: "#C6C9CC" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k solid gold",
+      dims: "3.5 mm band width",
+      fit: "Sizes 5–12 · free resizing within 60 days",
+    }),
+    features: [
+      "Recycled solid gold — never plated",
+      "Hand-forged and hand-polished",
+      "Complimentary resizing within 60 days",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 4.9,
+    reviewCount: 112,
+    badge: "Bestseller",
+    inStock: true,
+    stock: 26,
+    sku: "MER-JW-SOL-R",
+    isBestseller: true,
+  },
+  {
+    id: "j-eclat",
+    slug: "eclat-solitaire",
+    name: "Éclat Solitaire",
+    category: "jewelry",
+    price: 45000,
+    currency: "USD",
+    collection: "Rings",
+    variantLabel: "Metal",
+    shortDescription: "Ring · White sapphire solitaire",
+    description:
+      "One stone, held high. A hand-cut white sapphire in a six-claw crown of recycled gold, engineered like a movement — every angle set to return light. The quiet alternative to the expected solitaire.",
+    images: [img("1605100804763-247f67b3557e"), img("1515562141207-7a88fb7ce338"), img("1608042314453-ae338d80c427")],
+    variants: [
+      { id: "gold", name: "14k Gold", swatch: "#C9A24B" },
+      { id: "whitegold", name: "14k White Gold", swatch: "#DDD9CE" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k solid gold",
+      stone: "1.0 ct hand-cut white sapphire",
+      dims: "6-claw crown · 1.8 mm band",
+      fit: "Sizes 4–10 · free resizing within 60 days",
+    }),
+    features: [
+      "Hand-cut, conflict-free white sapphire",
+      "Six-claw crown setting",
+      "Recycled solid gold — never plated",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 5.0,
+    reviewCount: 44,
+    badge: "Limited",
+    inStock: true,
+    stock: 7,
+    sku: "MER-JW-ECL-R",
+  },
+  {
+    id: "j-cascade",
+    slug: "cascade-chain",
+    name: "Cascade Chain",
+    category: "jewelry",
+    price: 29000,
+    currency: "USD",
+    collection: "Necklaces",
+    variantLabel: "Metal",
+    shortDescription: "Necklace · Layered curb chain",
+    description:
+      "Two weights of hand-linked curb chain, layered to move like water. Solid through and through, with our brass-etched clasp signed the way we sign a caseback.",
+    images: [img("1535632066927-ab7c9ab60908"), img("1610694955371-d4a3e0ce4b52"), img("1599643478518-a784e5dc4c8f")],
+    variants: [
+      { id: "gold", name: "14k Gold", swatch: "#C9A24B" },
+      { id: "silver", name: "Sterling Silver", swatch: "#C6C9CC" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k solid gold",
+      dims: "41 cm + 46 cm layered · 3 cm extender",
+      fit: "Signed lobster clasp",
+    }),
+    features: [
+      "Two hand-linked curb weights",
+      "Signed, brass-etched clasp",
+      "Recycled solid gold — never plated",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 4.8,
+    reviewCount: 76,
+    inStock: true,
+    stock: 33,
+    sku: "MER-JW-CAS-N",
+  },
+  {
+    id: "j-lune",
+    slug: "lune-pendant",
+    name: "Lune Pendant",
+    category: "jewelry",
+    price: 26000,
+    currency: "USD",
+    collection: "Necklaces",
+    variantLabel: "Metal",
+    shortDescription: "Necklace · Moonstone pendant",
+    description:
+      "A sliver of moon, kept close. Rainbow moonstone bezel-set in recycled gold on a fine trace chain — the companion piece to our Luna Moonphase, made for the hours in between.",
+    images: [img("1602173574767-37ac01994b2a"), img("1599643478518-a784e5dc4c8f"), img("1603561591411-07134e71a2a9")],
+    variants: [
+      { id: "gold", name: "14k Gold", swatch: "#C9A24B" },
+      { id: "rosegold", name: "14k Rose Gold", swatch: "#B76E56" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k solid gold",
+      stone: "6 mm rainbow moonstone, bezel-set",
+      dims: "45 cm trace chain · 5 cm extender",
+    }),
+    features: [
+      "Bezel-set rainbow moonstone",
+      "Companion to the Luna Moonphase watch",
+      "Recycled solid gold — never plated",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 4.9,
+    reviewCount: 58,
+    badge: "New",
+    inStock: true,
+    stock: 21,
+    sku: "MER-JW-LUN-N",
+    isNew: true,
+  },
+  {
+    id: "j-perle",
+    slug: "perle-studs",
+    name: "Perle Studs",
+    category: "jewelry",
+    price: 18000,
+    currency: "USD",
+    collection: "Earrings",
+    variantLabel: "Metal",
+    shortDescription: "Earrings · Freshwater pearl studs",
+    description:
+      "The daily pearl, done properly. Hand-matched freshwater pearls on solid gold posts with our weighted butterfly backs — substantial enough to feel, subtle enough to forget.",
+    images: [img("1573408301185-9146fe634ad0"), img("1617038220319-276d3cfab638"), img("1610694955371-d4a3e0ce4b52")],
+    variants: [
+      { id: "gold", name: "14k Gold posts", swatch: "#C9A24B" },
+      { id: "silver", name: "Sterling Silver posts", swatch: "#C6C9CC" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k gold posts",
+      stone: "7.5 mm hand-matched freshwater pearls",
+      dims: "Weighted butterfly backs",
+    }),
+    features: [
+      "Hand-matched for lustre and shape",
+      "Solid gold posts — hypoallergenic",
+      "Weighted butterfly backs",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 4.8,
+    reviewCount: 93,
+    inStock: true,
+    stock: 44,
+    sku: "MER-JW-PER-E",
+  },
+  {
+    id: "j-hoops",
+    slug: "meridien-hoops",
+    name: "Méridien Hoops",
+    category: "jewelry",
+    price: 21000,
+    compareAtPrice: 24000,
+    currency: "USD",
+    collection: "Earrings",
+    variantLabel: "Metal",
+    shortDescription: "Earrings · Sculpted gold hoops",
+    description:
+      "Our line, drawn in gold. Sculpted hollow-form hoops with the gentle taper of a lugless case — featherlight at full size, secured with hinged closures that click like a clasp should.",
+    images: [img("1617038220319-276d3cfab638"), img("1573408301185-9146fe634ad0"), img("1599643478518-a784e5dc4c8f")],
+    variants: [
+      { id: "gold", name: "14k Gold", swatch: "#C9A24B" },
+      { id: "silver", name: "Sterling Silver", swatch: "#C6C9CC" },
+    ],
+    specs: jewelrySpecs({
+      material: "Recycled 14k solid gold",
+      dims: "24 mm diameter · hollow-form",
+      fit: "Hinged snap closure",
+    }),
+    features: [
+      "Hollow-form — featherlight all day",
+      "Hinged closures, satisfying click",
+      "Recycled solid gold — never plated",
+      "Presented in the signature Meridian case",
+    ],
+    rating: 4.7,
+    reviewCount: 67,
+    badge: "Sale",
+    inStock: true,
+    stock: 29,
+    sku: "MER-JW-HOO-E",
+  },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -336,7 +766,7 @@ export const heroBanners: HeroBanner[] = [
     image: img("1523275335684-37898b6baf30", 2000),
     align: "left",
     theme: "dark",
-    primaryCta: { label: "Shop Watches", href: "/shop" },
+    primaryCta: { label: "Shop Watches", href: "/category/watches" },
     secondaryCta: { label: "The Aera 39", href: "/product/meridian-aera-39" },
   },
   {
@@ -349,31 +779,31 @@ export const heroBanners: HeroBanner[] = [
     align: "center",
     theme: "dark",
     primaryCta: { label: "Discover Noir", href: "/product/meridian-noir-chronograph" },
-    secondaryCta: { label: "View Collection", href: "/shop" },
+    secondaryCta: { label: "View Collection", href: "/category/watches" },
   },
   {
     id: "hero-perfumes",
-    eyebrow: "Coming Autumn 2026",
+    eyebrow: "Now Live · The Perfume Collection",
     title: "A signature you can't see",
     subtitle:
-      "Meridian Perfumes arrives this autumn — small-batch extraits de parfum, blended by hand. Join the list to be first.",
+      "Six extraits de parfum, blended by hand in Grasse and bottled in weighted glass. Worn in whispers, remembered for hours.",
     image: img("1541643600914-78b084683601", 2000),
     align: "left",
     theme: "dark",
-    primaryCta: { label: "Get Early Access", href: "/category/perfumes" },
-    secondaryCta: { label: "Discover Perfumes", href: "/category/perfumes" },
+    primaryCta: { label: "Shop Perfumes", href: "/category/perfumes" },
+    secondaryCta: { label: "Ambre Méridien", href: "/product/ambre-meridien" },
   },
   {
     id: "hero-jewelry",
-    eyebrow: "Coming Winter 2026",
+    eyebrow: "Now Live · The Jewelry Collection",
     title: "Worn close, kept forever",
     subtitle:
-      "Meridian Jewelry — recycled gold and sterling essentials, finished by hand. Be first in line for the launch.",
+      "Recycled gold and sterling essentials, hand-finished in Vicenza and made to be handed down.",
     image: img("1515562141207-7a88fb7ce338", 2000),
     align: "center",
     theme: "dark",
-    primaryCta: { label: "Get Early Access", href: "/category/jewelry" },
-    secondaryCta: { label: "See the Collection", href: "/category/jewelry" },
+    primaryCta: { label: "Shop Jewelry", href: "/category/jewelry" },
+    secondaryCta: { label: "The Solstice Band", href: "/product/solstice-band" },
   },
 ];
 
@@ -384,7 +814,7 @@ export const promoBanners: PromoBanner[] = [
     title: "Personal engraving, on the house",
     body: "Add a monogram, a date or a few words to any caseback — complimentary with every timepiece.",
     image: img("1508057198894-247b23fe5ade", 1200),
-    cta: { label: "Explore Watches", href: "/shop" },
+    cta: { label: "Explore Watches", href: "/category/watches" },
   },
   {
     id: "promo-craft",
@@ -432,6 +862,7 @@ export const testimonials: Testimonial[] = [
 ];
 
 export const marqueeItems = [
+  "Now live: Perfumes & Jewelry",
   "Free worldwide shipping",
   "2-year international warranty",
   "Complimentary engraving",
@@ -465,5 +896,46 @@ export const bestsellers = products.filter((p) => p.isBestseller);
 export const newArrivals = products.filter((p) => p.isNew || p.badge === "New");
 export const featured = products.slice(0, 4);
 
-export const relatedProducts = (slug: string, limit = 4) =>
-  products.filter((p) => p.slug !== slug).slice(0, limit);
+/** Same-category products first, then the rest of the store. */
+export const relatedProducts = (slug: string, limit = 4) => {
+  const current = getProduct(slug);
+  if (!current) return products.slice(0, limit);
+  const same = products.filter((p) => p.category === current.category && p.slug !== slug);
+  const rest = products.filter((p) => p.category !== current.category && p.slug !== slug);
+  return [...same, ...rest].slice(0, limit);
+};
+
+/** Label used for the collection filter on each category's listing page. */
+export const collectionLabels: Record<string, string> = {
+  watches: "Collection",
+  perfumes: "Scent Family",
+  jewelry: "Type",
+};
+
+/** Editorial band shown at the bottom of each category storefront. */
+export const categoryEditorial: Record<string, PromoBanner> = {
+  watches: {
+    id: "edit-watches",
+    eyebrow: "The Workshop",
+    title: "Assembled by hand, tested for years",
+    body: "Every Meridian is regulated in six positions and pressure-tested before it ever reaches your wrist.",
+    image: img("1533139502658-0198f920d8e8", 1200),
+    cta: { label: "Our craft", href: "/about" },
+  },
+  perfumes: {
+    id: "edit-perfumes",
+    eyebrow: "The Atelier",
+    title: "Blended by hand in Grasse",
+    body: "Each extrait is composed in small numbered batches, macerated for six weeks and bottled at up to 30% concentration — strength you wear in whispers, not clouds.",
+    image: img("1588405748880-12d1d2a59f75", 1200),
+    cta: { label: "Read our story", href: "/about" },
+  },
+  jewelry: {
+    id: "edit-jewelry",
+    eyebrow: "The Bench",
+    title: "Recycled gold, hand-set stones",
+    body: "Every piece begins as reclaimed gold, refined and re-alloyed in Vicenza, then finished at the bench by a single goldsmith — the same way our watches are built.",
+    image: img("1599643478518-a784e5dc4c8f", 1200),
+    cta: { label: "Our craft", href: "/about" },
+  },
+};
