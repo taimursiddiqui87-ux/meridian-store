@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { sendOrderConfirmation } from "@/lib/email";
+import { sendOrderEmails } from "@/lib/email";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const METHODS = ["cod", "card", "jazzcash", "easypaisa"] as const;
@@ -112,7 +112,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       include: { items: true },
     });
 
-    await sendOrderConfirmation(order); // no-op until RESEND_API_KEY is set
+    await sendOrderEmails(order); // customer confirmation + admin notification (no-op until RESEND_API_KEY is set)
 
     return { ok: true, orderId: order.id, orderNumber };
   } catch (e) {
