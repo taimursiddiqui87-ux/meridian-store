@@ -64,3 +64,15 @@ export async function getSession(): Promise<SessionUser | null> {
 export function destroySession() {
   cookies().delete(COOKIE);
 }
+
+/**
+ * Admin access: any signed-in user by default, or — when ADMIN_EMAIL is set —
+ * only that address. Set ADMIN_EMAIL in production to lock the backend to you.
+ */
+export async function isAdmin(): Promise<boolean> {
+  const session = await getSession();
+  if (!session) return false;
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase().trim();
+  if (adminEmail) return session.email.toLowerCase() === adminEmail;
+  return true;
+}

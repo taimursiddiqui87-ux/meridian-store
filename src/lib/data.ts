@@ -787,7 +787,7 @@ export const heroBanners: HeroBanner[] = [
     title: "A signature you can't see",
     subtitle:
       "Six extraits de parfum, blended by hand in Grasse and bottled in weighted glass. Worn in whispers, remembered for hours.",
-    image: img("1541643600914-78b084683601", 2000),
+    image: img("1588405748880-12d1d2a59f75", 2000),
     align: "left",
     theme: "dark",
     primaryCta: { label: "Shop Perfumes", href: "/category/perfumes" },
@@ -799,7 +799,7 @@ export const heroBanners: HeroBanner[] = [
     title: "Worn close, kept forever",
     subtitle:
       "Recycled gold and sterling essentials, hand-finished in Vicenza and made to be handed down.",
-    image: img("1515562141207-7a88fb7ce338", 2000),
+    image: img("1611652022419-a9419f74343d", 2000),
     align: "center",
     theme: "dark",
     primaryCta: { label: "Shop Jewelry", href: "/category/jewelry" },

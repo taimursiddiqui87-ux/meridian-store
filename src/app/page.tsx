@@ -9,21 +9,24 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import {
-  heroBanners,
   categories,
   promoBanners,
   testimonials,
   getProductsByCategory,
 } from "@/lib/data";
+import { getHeroBanners } from "@/lib/banners";
 
-export default function Home() {
+export const revalidate = 300;
+
+export default async function Home() {
+  const banners = await getHeroBanners();
   const watches = getProductsByCategory("watches");
   const perfumes = getProductsByCategory("perfumes");
   const jewelry = getProductsByCategory("jewelry");
 
   return (
     <>
-      <HeroCarousel banners={heroBanners} />
+      <HeroCarousel banners={banners} />
       <TrustBar />
 
       {/* Categories */}

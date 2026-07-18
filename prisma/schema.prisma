@@ -53,3 +53,25 @@ model OrderItem {
   quantity  Int
   image     String
 }
+
+model Banner {
+  id             String   @id @default(cuid())
+  kind           String   @default("hero") // hero (carousel) | promo
+  eyebrow        String?
+  title          String
+  subtitle       String?
+  image          String
+  align          String   @default("left") // left | center
+  theme          String   @default("dark") // dark | light
+  badge          String? // e.g. "Launch Sale", "-20%" — shown as a pill (sale-ready)
+  primaryLabel   String?
+  primaryHref    String?
+  secondaryLabel String?
+  secondaryHref  String?
+  active         Boolean  @default(true)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([kind, active, sortOrder])
+}

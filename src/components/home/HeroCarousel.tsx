@@ -60,13 +60,20 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
               active.align === "center" && "mx-auto text-center",
             )}
           >
-            <p className="eyebrow animate-fade-up text-brass-300">{active.eyebrow}</p>
-            <h1 className="mt-5 animate-fade-up animation-delay-100 font-serif text-5xl leading-[1.02] text-paper text-balance sm:text-6xl lg:text-7xl">
-              {active.title}
-            </h1>
-            <p className="mt-6 max-w-lg animate-fade-up animation-delay-200 text-base leading-relaxed text-paper/80 text-pretty sm:text-lg">
-              {active.subtitle}
-            </p>
+            <Link href={active.primaryCta.href} className="block" aria-label={active.title}>
+              {active.badge && (
+                <span className="mb-4 inline-block animate-fade-up bg-brass-500 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider2 text-ink">
+                  {active.badge}
+                </span>
+              )}
+              <p className="eyebrow animate-fade-up text-brass-300">{active.eyebrow}</p>
+              <h1 className="mt-4 animate-fade-up animation-delay-100 font-serif text-5xl leading-[1.02] text-paper text-balance transition-opacity duration-300 hover:opacity-90 sm:text-6xl lg:text-7xl">
+                {active.title}
+              </h1>
+              <p className="mt-6 max-w-lg animate-fade-up animation-delay-200 text-base leading-relaxed text-paper/80 text-pretty sm:text-lg">
+                {active.subtitle}
+              </p>
+            </Link>
             <div
               className={cn(
                 "mt-9 flex animate-fade-up animation-delay-300 flex-wrap gap-3",

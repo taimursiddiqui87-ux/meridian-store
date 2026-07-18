@@ -56,6 +56,7 @@ export interface HeroBanner {
   image: string;
   align: "left" | "center";
   theme: "dark" | "light";
+  badge?: string;
   primaryCta: { label: string; href: string };
   secondaryCta?: { label: string; href: string };
 }
