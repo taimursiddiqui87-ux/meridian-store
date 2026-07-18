@@ -58,6 +58,7 @@ const tones: Record<string, string> = {
   Pending: "bg-stone-100 text-stone-600",
   Processing: "bg-stone-100 text-stone-600",
   Refunded: "bg-danger/10 text-danger",
+  Cancelled: "bg-danger/10 text-danger",
   Active: "bg-success/10 text-success",
   Draft: "bg-stone-100 text-stone-600",
   VIP: "bg-brass-100 text-brass-700",

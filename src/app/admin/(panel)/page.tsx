@@ -1,24 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  TrendingUp,
-  TrendingDown,
-  Download,
-  Plus,
-  ArrowRight,
-  AlertTriangle,
-} from "lucide-react";
+import { Download, Plus, ArrowRight, AlertTriangle } from "lucide-react";
 import { PageHeader, Card, CardHead, Pill } from "@/components/admin/AdminUI";
-import {
-  kpis,
-  salesSeries,
-  recentOrders,
-  topProducts,
-  lowStock,
-  channelBreakdown,
-} from "@/lib/adminData";
+import { salesSeries, topProducts, lowStock, channelBreakdown } from "@/lib/adminData";
+import { getAllOrders } from "@/lib/orders";
+import { formatPrice } from "@/lib/utils";
 
-/* Build an SVG area chart from the revenue series. */
+export const dynamic = "force-dynamic";
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
 function RevenueChart() {
   const W = 640;
   const H = 220;
@@ -72,10 +63,7 @@ function Donut() {
     .join(", ");
   return (
     <div className="flex items-center gap-5">
-      <div
-        className="relative h-28 w-28 shrink-0 rounded-full"
-        style={{ background: `conic-gradient(${stops})` }}
-      >
+      <div className="relative h-28 w-28 shrink-0 rounded-full" style={{ background: `conic-gradient(${stops})` }}>
         <div className="absolute inset-[22%] grid place-items-center rounded-full bg-white text-center">
           <span className="text-lg font-semibold leading-none">2.4k</span>
           <span className="text-[9px] uppercase tracking-wider text-stone-400">visits</span>
@@ -94,45 +82,56 @@ function Donut() {
   );
 }
 
-const todayReport = [
-  { label: "Gross revenue", value: "$18,420" },
-  { label: "Orders", value: "14" },
-  { label: "Units sold", value: "17" },
-  { label: "New customers", value: "6" },
-  { label: "Returns / refunds", value: "1" },
-  { label: "Avg. order value", value: "$1,316" },
-];
+export default async function AdminDashboard() {
+  const orders = await getAllOrders();
 
-export default function AdminDashboard() {
+  const totalRevenue = orders.reduce((n, o) => n + o.total, 0);
+  const totalUnits = orders.reduce((n, o) => n + o.items.reduce((m, i) => m + i.quantity, 0), 0);
+  const aov = orders.length ? Math.round(totalRevenue / orders.length) : 0;
+
+  const kpiCards = [
+    { label: "Revenue", value: formatPrice(totalRevenue), sub: "All orders" },
+    { label: "Orders", value: String(orders.length), sub: "All time" },
+    { label: "Avg. order value", value: orders.length ? formatPrice(aov) : "—", sub: "Per order" },
+    { label: "Units sold", value: String(totalUnits), sub: "All time" },
+  ];
+
+  const recent = orders.slice(0, 6);
+
+  const totals = [
+    { label: "Gross revenue", value: formatPrice(totalRevenue) },
+    { label: "Orders", value: String(orders.length) },
+    { label: "Units sold", value: String(totalUnits) },
+    { label: "Avg. order value", value: orders.length ? formatPrice(aov) : "—" },
+    { label: "Cash on delivery (pending)", value: String(orders.filter((o) => o.status === "pending").length) },
+    { label: "Paid", value: String(orders.filter((o) => o.status === "paid").length) },
+  ];
+
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <div>
-      <PageHeader title="Dashboard" subtitle="Your store at a glance — Tuesday, 15 July 2026.">
+      <PageHeader title="Dashboard" subtitle={`Your store at a glance — ${today}.`}>
         <button className="btn rounded-lg border border-stone-300 bg-white px-4 py-2.5 text-[13px] hover:bg-stone-50">
           <Download size={15} /> Export
         </button>
-        <Link
-          href="/admin/products"
-          className="btn rounded-lg bg-ink px-4 py-2.5 text-[13px] text-paper hover:bg-ink-soft"
-        >
+        <Link href="/admin/products" className="btn rounded-lg bg-ink px-4 py-2.5 text-[13px] text-paper hover:bg-ink-soft">
           <Plus size={15} /> Add product
         </Link>
       </PageHeader>
 
-      {/* KPIs */}
+      {/* KPIs (real) */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {kpis.map((k) => (
+        {kpiCards.map((k) => (
           <Card key={k.label} className="p-5">
             <p className="text-[12px] uppercase tracking-wider2 text-ink-muted">{k.label}</p>
             <p className="mt-2 font-serif text-3xl tabular-nums">{k.value}</p>
-            <p
-              className={`mt-2 flex items-center gap-1 text-[12px] font-medium ${
-                k.up ? "text-success" : "text-danger"
-              }`}
-            >
-              {k.up ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-              {k.delta}
-              <span className="font-normal text-stone-400">· {k.sub}</span>
-            </p>
+            <p className="mt-2 text-[12px] text-stone-400">{k.sub}</p>
           </Card>
         ))}
       </div>
@@ -142,8 +141,8 @@ export default function AdminDashboard() {
         <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHead
-              title="Revenue — last 14 days"
-              action={<span className="text-[13px] font-medium text-success">+16.8% ↑</span>}
+              title="Revenue trend"
+              action={<span className="text-[12px] text-stone-400">Illustrative</span>}
             />
             <div className="p-5">
               <RevenueChart />
@@ -171,20 +170,32 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-50">
-                  {recentOrders.slice(0, 6).map((o) => (
-                    <tr key={o.id} className="hover:bg-stone-50/60">
-                      <td className="px-5 py-3.5 font-medium text-ink">{o.id}</td>
-                      <td className="px-5 py-3.5">
-                        <p className="text-ink">{o.customer}</p>
-                        <p className="text-[12px] text-stone-400">{o.product}</p>
+                  {recent.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-5 py-12 text-center text-stone-400">
+                        No orders yet — they’ll show here the moment a customer checks out.
                       </td>
-                      <td className="px-5 py-3.5 tabular-nums">{o.total}</td>
-                      <td className="px-5 py-3.5">
-                        <Pill status={o.status} />
-                      </td>
-                      <td className="px-5 py-3.5 text-[13px] text-stone-500">{o.date}</td>
                     </tr>
-                  ))}
+                  ) : (
+                    recent.map((o) => (
+                      <tr key={o.id} className="hover:bg-stone-50/60">
+                        <td className="px-5 py-3.5 font-medium text-ink">{o.orderNumber}</td>
+                        <td className="px-5 py-3.5">
+                          <p className="text-ink">{o.customerName || "Guest"}</p>
+                          <p className="max-w-[180px] truncate text-[12px] text-stone-400">
+                            {o.items.map((i) => i.name).join(", ")}
+                          </p>
+                        </td>
+                        <td className="px-5 py-3.5 tabular-nums">{formatPrice(o.total)}</td>
+                        <td className="px-5 py-3.5">
+                          <Pill status={cap(o.status)} />
+                        </td>
+                        <td className="px-5 py-3.5 text-[13px] text-stone-500">
+                          {new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -194,9 +205,9 @@ export default function AdminDashboard() {
         {/* Right column */}
         <div className="space-y-6">
           <Card>
-            <CardHead title="Today's report" />
+            <CardHead title="Store totals" />
             <ul className="divide-y divide-stone-50">
-              {todayReport.map((r) => (
+              {totals.map((r) => (
                 <li key={r.label} className="flex items-center justify-between px-5 py-3">
                   <span className="text-[13px] text-ink-muted">{r.label}</span>
                   <span className="font-medium tabular-nums">{r.value}</span>
@@ -206,17 +217,14 @@ export default function AdminDashboard() {
           </Card>
 
           <Card>
-            <CardHead title="Traffic by channel" />
+            <CardHead title="Traffic by channel" action={<span className="text-[12px] text-stone-400">Illustrative</span>} />
             <div className="p-5">
               <Donut />
             </div>
           </Card>
 
           <Card>
-            <CardHead
-              title="Low stock"
-              action={<AlertTriangle size={15} className="text-brass-600" />}
-            />
+            <CardHead title="Low stock" action={<AlertTriangle size={15} className="text-brass-600" />} />
             <ul className="divide-y divide-stone-50">
               {lowStock.map((p) => (
                 <li key={p.sku} className="flex items-center justify-between px-5 py-3">
