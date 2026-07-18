@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProduct, products, relatedProducts } from "@/lib/data";
+import { products as seedProducts } from "@/lib/data";
+import { getProduct, getRelatedProducts } from "@/lib/products";
 import { ProductDetail } from "@/components/product/ProductDetail";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
+export const revalidate = 300;
+
 export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+  return seedProducts.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const product = getProduct(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const product = await getProduct(params.slug);
   if (!product) return { title: "Product not found" };
   return {
     title: product.name,
@@ -18,11 +21,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = getProduct(params.slug);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProduct(params.slug);
   if (!product) notFound();
 
-  const related = relatedProducts(product.slug, 4);
+  const related = await getRelatedProducts(product.slug, 4);
 
   return (
     <>

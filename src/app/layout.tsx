@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { Chrome } from "@/components/layout/Chrome";
 import { getSiteConfig } from "@/lib/settings";
+import { getProductsByCategory } from "@/lib/products";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { store } = await getSiteConfig();
@@ -22,7 +23,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const config = await getSiteConfig();
+  const [config, watches] = await Promise.all([getSiteConfig(), getProductsByCategory("watches")]);
+  const watchNav = watches.slice(0, 8).map((p) => ({
+    name: p.name,
+    slug: p.slug,
+    image: p.images[0] ?? "",
+  }));
   return (
     <html lang="en">
       <head>
@@ -35,7 +41,7 @@ export default async function RootLayout({
       </head>
       <body>
         <CartProvider>
-          <Chrome store={config.store} announcements={config.announcements}>
+          <Chrome store={config.store} announcements={config.announcements} watchNav={watchNav}>
             {children}
           </Chrome>
         </CartProvider>

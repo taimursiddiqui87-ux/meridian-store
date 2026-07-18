@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X, ChevronRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { products } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 import { logoutAction } from "@/app/actions/auth";
 
 type NavItem = { label: string; href: string; mega?: boolean; soon?: boolean };
+
+export type NavProduct = { name: string; slug: string; image: string };
 
 const nav: NavItem[] = [
   { label: "Watches", href: "/category/watches", mega: true },
@@ -19,15 +20,16 @@ const nav: NavItem[] = [
   { label: "Our Story", href: "/about" },
 ];
 
-const watchCatalog = products.filter((p) => p.category === "watches");
-
 export function Header({
   storeName,
   established,
+  watchNav,
 }: {
   storeName: string;
   established: string;
+  watchNav: NavProduct[];
 }) {
+  const featuredWatch = watchNav[0];
   const { count, openCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -116,9 +118,9 @@ export function Header({
                         <div>
                           <p className="label-caps mb-4 text-stone-400">Collections</p>
                           <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                            {watchCatalog.map((p) => (
+                            {watchNav.map((p) => (
                               <Link
-                                key={p.id}
+                                key={p.slug}
                                 href={`/product/${p.slug}`}
                                 className="group/link flex items-center justify-between text-[13.5px] text-ink-soft transition-colors hover:text-brass-600"
                               >
@@ -137,21 +139,23 @@ export function Header({
                             View all watches
                           </Link>
                         </div>
-                        <Link href={`/product/${watchCatalog[0].slug}`} className="group/feat relative block overflow-hidden bg-cream">
-                          <Image
-                            src={watchCatalog[0].images[0]}
-                            alt={watchCatalog[0].name}
-                            width={320}
-                            height={360}
-                            className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover/feat:scale-105"
-                          />
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-4">
-                            <p className="text-[10px] uppercase tracking-wider2 text-brass-300">
-                              Bestseller
-                            </p>
-                            <p className="font-serif text-lg text-paper">{watchCatalog[0].name}</p>
-                          </div>
-                        </Link>
+                        {featuredWatch && (
+                          <Link href={`/product/${featuredWatch.slug}`} className="group/feat relative block overflow-hidden bg-cream">
+                            <Image
+                              src={featuredWatch.image}
+                              alt={featuredWatch.name}
+                              width={320}
+                              height={360}
+                              className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover/feat:scale-105"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-4">
+                              <p className="text-[10px] uppercase tracking-wider2 text-brass-300">
+                                Bestseller
+                              </p>
+                              <p className="font-serif text-lg text-paper">{featuredWatch.name}</p>
+                            </div>
+                          </Link>
+                        )}
                       </div>
                     </div>
                   )}

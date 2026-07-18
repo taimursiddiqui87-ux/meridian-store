@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   getCategory,
-  getProductsByCategory,
   categories,
   categoryEditorial,
   collectionLabels,
 } from "@/lib/data";
+import { getProductsByCategory } from "@/lib/products";
 import { ComingSoon } from "@/components/category/ComingSoon";
 import { CategoryHero } from "@/components/category/CategoryHero";
 import { ProductListing } from "@/components/shop/ProductListing";
@@ -26,14 +26,16 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
+export const revalidate = 300;
+
+export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const category = getCategory(params.slug);
   if (!category) notFound();
 
   // Future lines can still tease before launch.
   if (category.status === "coming-soon") return <ComingSoon category={category} />;
 
-  const items = getProductsByCategory(category.slug);
+  const items = await getProductsByCategory(category.slug);
   const editorial = categoryEditorial[category.slug];
 
   return (

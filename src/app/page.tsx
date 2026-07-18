@@ -8,7 +8,8 @@ import { InstagramGrid } from "@/components/home/InstagramGrid";
 import { HomeProductSection } from "@/components/home/HomeProductSection";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
-import { categories, promoBanners, testimonials, getProduct } from "@/lib/data";
+import { categories, promoBanners, testimonials } from "@/lib/data";
+import { getProducts } from "@/lib/products";
 import { getHeroBanners } from "@/lib/banners";
 import { getSiteConfig } from "@/lib/settings";
 import type { Product } from "@/lib/types";
@@ -18,8 +19,10 @@ export const revalidate = 300;
 export default async function Home() {
   const banners = await getHeroBanners();
   const { home } = await getSiteConfig();
+  const catalog = await getProducts();
+  const bySlug = new Map(catalog.map((p) => [p.slug, p]));
   const resolve = (slugs: string[]): Product[] =>
-    slugs.map((s) => getProduct(s)).filter((p): p is Product => Boolean(p));
+    slugs.map((s) => bySlug.get(s)).filter((p): p is Product => Boolean(p));
 
   return (
     <>

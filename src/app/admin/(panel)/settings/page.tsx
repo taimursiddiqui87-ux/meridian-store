@@ -1,11 +1,11 @@
 import { getSiteConfigFresh } from "@/lib/settings";
-import { products } from "@/lib/data";
+import { getAdminProducts } from "@/lib/products";
 import { SettingsAdmin } from "@/components/admin/SettingsAdmin";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const config = await getSiteConfigFresh();
+  const [config, products] = await Promise.all([getSiteConfigFresh(), getAdminProducts()]);
   const catalog = products.map((p) => ({
     slug: p.slug,
     name: p.name,

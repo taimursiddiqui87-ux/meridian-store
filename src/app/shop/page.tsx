@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { products } from "@/lib/data";
+import { getProducts } from "@/lib/products";
 import { ProductListing } from "@/components/shop/ProductListing";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
@@ -8,11 +8,14 @@ export const metadata: Metadata = {
   description: "Every Meridian — watches, perfumes and jewelry — in one place.",
 };
 
-export default function ShopPage({
+export const revalidate = 300;
+
+export default async function ShopPage({
   searchParams,
 }: {
   searchParams: { q?: string; sort?: string };
 }) {
+  const products = await getProducts();
   return (
     <div>
       <div className="border-b border-stone-200 bg-cream/40">

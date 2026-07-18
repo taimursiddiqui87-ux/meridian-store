@@ -46,6 +46,8 @@ export interface Product {
   sku: string;
   isNew?: boolean;
   isBestseller?: boolean;
+  /** Admin-only: false = Draft (hidden from storefront). Undefined = active. */
+  active?: boolean;
 }
 
 export interface HeroBanner {

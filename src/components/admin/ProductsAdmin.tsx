@@ -1,88 +1,160 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Plus, Search, Pencil, Trash2, X, Package } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Search, Pencil, Trash2, X, Package, DownloadCloud, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { products as catalog } from "@/lib/data";
 import { PageHeader, Card, Pill } from "@/components/admin/AdminUI";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { saveProduct, deleteProduct, seedCatalog } from "@/app/actions/products";
 
-interface Row {
+export interface AdminRow {
   id: string;
+  slug: string;
   name: string;
+  category: string;
   collection: string;
   sku: string;
   price: number; // dollars
+  compareAt: number; // dollars (0 = none)
   stock: number;
-  status: "Active" | "Draft";
+  active: boolean;
   image: string;
+  badge: string;
 }
 
-const seed: Row[] = catalog.map((p) => ({
-  id: p.id,
-  name: p.name,
-  collection: p.collection,
-  sku: p.sku,
-  price: Math.round(p.price / 100),
-  stock: p.stock,
-  status: "Active",
-  image: p.images[0],
-}));
+const CATEGORIES = [
+  { value: "watches", label: "Watches" },
+  { value: "perfumes", label: "Perfumes" },
+  { value: "jewelry", label: "Jewelry" },
+];
 
-const empty: Row = {
+const emptyRow: AdminRow = {
   id: "",
+  slug: "",
   name: "",
+  category: "watches",
   collection: "",
   sku: "",
   price: 0,
+  compareAt: 0,
   stock: 0,
-  status: "Active",
+  active: true,
   image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=400&q=80",
+  badge: "",
 };
 
-export function ProductsAdmin() {
-  const [rows, setRows] = useState<Row[]>(seed);
+export function ProductsAdmin({ initial, persisted }: { initial: AdminRow[]; persisted: boolean }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
-  const [editing, setEditing] = useState<Row | null>(null);
+  const [editing, setEditing] = useState<AdminRow | null>(null);
   const [isNew, setIsNew] = useState(false);
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((r) => `${r.name} ${r.collection} ${r.sku}`.toLowerCase().includes(q));
-  }, [rows, query]);
+    if (!q) return initial;
+    return initial.filter((r) =>
+      `${r.name} ${r.collection} ${r.sku} ${r.category}`.toLowerCase().includes(q),
+    );
+  }, [initial, query]);
+
+  const totalUnits = initial.reduce((n, r) => n + r.stock, 0);
 
   const openNew = () => {
-    setEditing({ ...empty, id: "new-" + Date.now() });
+    setError(null);
+    setEditing({ ...emptyRow });
     setIsNew(true);
   };
-  const openEdit = (row: Row) => {
+  const openEdit = (row: AdminRow) => {
+    setError(null);
     setEditing(row);
     setIsNew(false);
   };
-  const remove = (id: string) => setRows((r) => r.filter((x) => x.id !== id));
 
-  const save = (row: Row) => {
-    setRows((prev) => {
-      const exists = prev.some((p) => p.id === row.id);
-      return exists ? prev.map((p) => (p.id === row.id ? row : p)) : [row, ...prev];
+  const doImport = () =>
+    start(async () => {
+      const res = await seedCatalog();
+      if (!res.ok) setError(res.error ?? "Import failed.");
+      else router.refresh();
     });
-    setEditing(null);
-  };
 
-  const totalUnits = rows.reduce((n, r) => n + r.stock, 0);
+  const doSave = (row: AdminRow) =>
+    start(async () => {
+      const res = await saveProduct({
+        id: row.id || undefined,
+        name: row.name,
+        category: row.category,
+        collection: row.collection,
+        sku: row.sku,
+        priceDollars: row.price,
+        compareAtDollars: row.compareAt || null,
+        stock: row.stock,
+        active: row.active,
+        image: row.image,
+        badge: row.badge || null,
+      });
+      if (!res.ok) {
+        setError(res.error ?? "Save failed.");
+      } else {
+        setEditing(null);
+        router.refresh();
+      }
+    });
+
+  const doDelete = (id: string) =>
+    start(async () => {
+      const res = await deleteProduct(id);
+      if (!res.ok) setError(res.error ?? "Delete failed.");
+      else router.refresh();
+    });
 
   return (
     <div>
-      <PageHeader title="Products" subtitle={`${rows.length} products · ${totalUnits} units in stock`}>
-        <button
-          onClick={openNew}
-          className="btn rounded-lg bg-ink px-4 py-2.5 text-[13px] text-paper hover:bg-ink-soft"
-        >
-          <Plus size={15} /> Add product
-        </button>
+      <PageHeader
+        title="Products"
+        subtitle={`${initial.length} products · ${totalUnits} units in stock`}
+      >
+        {persisted && (
+          <button
+            onClick={openNew}
+            disabled={pending}
+            className="btn rounded-lg bg-ink px-4 py-2.5 text-[13px] text-paper hover:bg-ink-soft disabled:opacity-50"
+          >
+            <Plus size={15} /> Add product
+          </button>
+        )}
       </PageHeader>
+
+      {error && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+          <AlertCircle size={16} /> {error}
+        </div>
+      )}
+
+      {!persisted && (
+        <div className="mb-5 flex flex-col gap-3 rounded-xl border border-brass-300 bg-brass-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <Package size={20} className="mt-0.5 shrink-0 text-brass-600" />
+            <div>
+              <p className="font-medium text-ink">You&apos;re viewing the built-in demo catalog</p>
+              <p className="mt-0.5 text-[13px] text-ink-muted">
+                Import it once to start editing, adding and removing products. Everything then
+                saves to your store&apos;s database.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={doImport}
+            disabled={pending}
+            className="btn shrink-0 rounded-lg bg-ink px-4 py-2.5 text-[13px] text-paper hover:bg-ink-soft disabled:opacity-50"
+          >
+            <DownloadCloud size={15} /> {pending ? "Importing…" : "Import demo catalog"}
+          </button>
+        </div>
+      )}
 
       <Card>
         <div className="flex items-center gap-3 border-b border-stone-100 px-4 py-3">
@@ -91,23 +163,23 @@ export function ProductsAdmin() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products or SKU…"
+              placeholder="Search products, SKU or category…"
               className="w-full bg-transparent py-2 text-sm outline-none"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead>
               <tr className="border-b border-stone-100 text-[11px] uppercase tracking-wider text-stone-400">
                 <th className="px-5 py-3 font-medium">Product</th>
                 <th className="px-5 py-3 font-medium">SKU</th>
-                <th className="px-5 py-3 font-medium">Collection</th>
+                <th className="px-5 py-3 font-medium">Category</th>
                 <th className="px-5 py-3 font-medium">Price</th>
                 <th className="px-5 py-3 font-medium">Inventory</th>
                 <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium text-right">Actions</th>
+                {persisted && <th className="px-5 py-3 font-medium text-right">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-50">
@@ -116,51 +188,52 @@ export function ProductsAdmin() {
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative h-11 w-9 shrink-0 overflow-hidden rounded bg-cream">
-                        <Image src={r.image} alt="" fill sizes="36px" className="object-cover" />
+                        {r.image && <Image src={r.image} alt="" fill sizes="36px" className="object-cover" />}
                       </div>
                       <span className="font-medium text-ink">{r.name}</span>
                     </div>
                   </td>
                   <td className="px-5 py-3 text-[13px] text-stone-500">{r.sku}</td>
-                  <td className="px-5 py-3 text-[13px]">{r.collection}</td>
+                  <td className="px-5 py-3 text-[13px] capitalize">{r.category}</td>
                   <td className="px-5 py-3 tabular-nums">${r.price.toLocaleString()}</td>
                   <td className="px-5 py-3">
                     <span
-                      className={cn(
-                        "tabular-nums",
-                        r.stock <= 10 ? "font-semibold text-danger" : "text-ink",
-                      )}
+                      className={cn("tabular-nums", r.stock <= 10 ? "font-semibold text-danger" : "text-ink")}
                     >
                       {r.stock}
                     </span>
                     <span className="text-stone-400"> in stock</span>
                   </td>
                   <td className="px-5 py-3">
-                    <Pill status={r.status} />
+                    <Pill status={r.active ? "Active" : "Draft"} />
                   </td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center justify-end gap-1">
-                      <button
-                        onClick={() => openEdit(r)}
-                        className="grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100 hover:text-ink"
-                        aria-label="Edit"
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => remove(r.id)}
-                        className="grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-danger/10 hover:text-danger"
-                        aria-label="Delete"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
-                  </td>
+                  {persisted && (
+                    <td className="px-5 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => openEdit(r)}
+                          disabled={pending}
+                          className="grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-stone-100 hover:text-ink disabled:opacity-40"
+                          aria-label="Edit"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          onClick={() => doDelete(r.id)}
+                          disabled={pending}
+                          className="grid h-8 w-8 place-items-center rounded-md text-stone-500 hover:bg-danger/10 hover:text-danger disabled:opacity-40"
+                          aria-label="Delete"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-16 text-center text-stone-400">
+                  <td colSpan={persisted ? 7 : 6} className="px-5 py-16 text-center text-stone-400">
                     <Package size={28} className="mx-auto mb-3 opacity-40" />
                     No products match “{query}”.
                   </td>
@@ -173,11 +246,12 @@ export function ProductsAdmin() {
 
       {editing && (
         <ProductDrawer
-          key={editing.id}
+          key={editing.id || "new"}
           initial={editing}
           isNew={isNew}
+          pending={pending}
           onClose={() => setEditing(null)}
-          onSave={save}
+          onSave={doSave}
         />
       )}
     </div>
@@ -187,16 +261,18 @@ export function ProductsAdmin() {
 function ProductDrawer({
   initial,
   isNew,
+  pending,
   onClose,
   onSave,
 }: {
-  initial: Row;
+  initial: AdminRow;
   isNew: boolean;
+  pending: boolean;
   onClose: () => void;
-  onSave: (r: Row) => void;
+  onSave: (r: AdminRow) => void;
 }) {
-  const [form, setForm] = useState<Row>(initial);
-  const set = (patch: Partial<Row>) => setForm((f) => ({ ...f, ...patch }));
+  const [form, setForm] = useState<AdminRow>(initial);
+  const set = (patch: Partial<AdminRow>) => setForm((f) => ({ ...f, ...patch }));
 
   return (
     <div className="fixed inset-0 z-50">
@@ -213,7 +289,7 @@ function ProductDrawer({
           <div>
             <div className="flex items-center gap-4">
               <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-cream">
-                <Image src={form.image} alt="" fill sizes="64px" className="object-cover" />
+                {form.image && <Image src={form.image} alt="" fill sizes="64px" className="object-cover" />}
               </div>
               <div className="flex-1">
                 <label className="field-label">Image</label>
@@ -235,22 +311,53 @@ function ProductDrawer({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="field-label">Collection</label>
-              <input value={form.collection} onChange={(e) => set({ collection: e.target.value })} className="field-input" />
+              <label className="field-label">Category</label>
+              <select
+                value={form.category}
+                onChange={(e) => set({ category: e.target.value })}
+                className="field-input"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="field-label">SKU</label>
-              <input value={form.sku} onChange={(e) => set({ sku: e.target.value })} placeholder="MER-…" className="field-input" />
+              <label className="field-label">Collection</label>
+              <input value={form.collection} onChange={(e) => set({ collection: e.target.value })} placeholder="e.g. Aera" className="field-input" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="field-label">SKU</label>
+              <input value={form.sku} onChange={(e) => set({ sku: e.target.value })} placeholder="MER-…" className="field-input" />
+            </div>
+            <div>
+              <label className="field-label">Badge (optional)</label>
+              <input value={form.badge} onChange={(e) => set({ badge: e.target.value })} placeholder="e.g. Sale, New" className="field-input" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="field-label">Price (USD)</label>
               <input
                 type="number"
                 value={form.price || ""}
                 onChange={(e) => set({ price: Number(e.target.value) })}
+                className="field-input"
+              />
+            </div>
+            <div>
+              <label className="field-label">Compare-at</label>
+              <input
+                type="number"
+                value={form.compareAt || ""}
+                onChange={(e) => set({ compareAt: Number(e.target.value) })}
+                placeholder="0"
                 className="field-input"
               />
             </div>
@@ -268,16 +375,19 @@ function ProductDrawer({
           <div>
             <label className="field-label">Status</label>
             <div className="flex gap-2">
-              {(["Active", "Draft"] as const).map((s) => (
+              {[
+                { label: "Active", val: true },
+                { label: "Draft", val: false },
+              ].map((s) => (
                 <button
-                  key={s}
-                  onClick={() => set({ status: s })}
+                  key={s.label}
+                  onClick={() => set({ active: s.val })}
                   className={cn(
                     "flex-1 rounded-lg border py-2.5 text-sm transition-colors",
-                    form.status === s ? "border-ink bg-ink text-paper" : "border-stone-200 hover:border-stone-300",
+                    form.active === s.val ? "border-ink bg-ink text-paper" : "border-stone-200 hover:border-stone-300",
                   )}
                 >
-                  {s}
+                  {s.label}
                 </button>
               ))}
             </div>
@@ -290,9 +400,10 @@ function ProductDrawer({
           </button>
           <button
             onClick={() => onSave({ ...form, name: form.name || "Untitled", sku: form.sku || "MER-NEW" })}
-            className="btn flex-[2] rounded-lg bg-ink py-3 text-[13px] text-paper hover:bg-ink-soft"
+            disabled={pending}
+            className="btn flex-[2] rounded-lg bg-ink py-3 text-[13px] text-paper hover:bg-ink-soft disabled:opacity-50"
           >
-            {isNew ? "Create product" : "Save changes"}
+            {pending ? "Saving…" : isNew ? "Create product" : "Save changes"}
           </button>
         </div>
       </div>
