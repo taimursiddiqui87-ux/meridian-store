@@ -18,6 +18,7 @@ import {
 import type { Banner } from "@prisma/client";
 import { cn } from "@/lib/utils";
 import { PageHeader, Card, CardHead, Pill } from "@/components/admin/AdminUI";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 import {
   saveBanner,
   deleteBanner,
@@ -296,20 +297,21 @@ function BannerDrawer({
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="field-label mb-0">Image URL</label>
+              <label className="field-label mb-0">Image</label>
               {form.image && (
                 <button onClick={() => set({ image: "" })} className="text-[11px] text-danger hover:underline">
                   Remove image
                 </button>
               )}
             </div>
+            <ImageUploader folder="banners" onUploaded={(url) => set({ image: url })} className="mb-2" />
             <input
               value={form.image}
               onChange={(e) => set({ image: e.target.value })}
-              placeholder="https://…/photo.jpg"
+              placeholder="…or paste an image URL"
               className="field-input"
             />
-            <p className="mt-1 text-[11px] text-stone-400">Paste any hosted image URL (e.g. Unsplash, your CDN).</p>
+            <p className="mt-1 text-[11px] text-stone-400">Upload from your device, or paste any hosted image URL.</p>
           </div>
 
           <div>

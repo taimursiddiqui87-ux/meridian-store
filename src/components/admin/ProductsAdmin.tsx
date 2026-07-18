@@ -6,6 +6,7 @@ import { Plus, Search, Pencil, Trash2, X, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { products as catalog } from "@/lib/data";
 import { PageHeader, Card, Pill } from "@/components/admin/AdminUI";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 interface Row {
   id: string;
@@ -209,14 +210,22 @@ function ProductDrawer({
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-6">
-          <div className="flex items-center gap-4">
-            <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-cream">
-              <Image src={form.image} alt="" fill sizes="64px" className="object-cover" />
+          <div>
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-cream">
+                <Image src={form.image} alt="" fill sizes="64px" className="object-cover" />
+              </div>
+              <div className="flex-1">
+                <label className="field-label">Image</label>
+                <input
+                  value={form.image}
+                  onChange={(e) => set({ image: e.target.value })}
+                  placeholder="…or paste an image URL"
+                  className="field-input"
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <label className="field-label">Image URL</label>
-              <input value={form.image} onChange={(e) => set({ image: e.target.value })} className="field-input" />
-            </div>
+            <ImageUploader folder="products" onUploaded={(url) => set({ image: url })} className="mt-3" />
           </div>
 
           <div>
