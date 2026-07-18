@@ -10,6 +10,7 @@ import {
   Truck,
   Users,
   LayoutTemplate,
+  Ticket,
   Settings,
   Search,
   Bell,
@@ -34,6 +35,7 @@ const nav: { section: string; items: NavItem[] }[] = [
     items: [
       { label: "Orders", href: "/admin/orders", icon: ShoppingBag },
       { label: "Products", href: "/admin/products", icon: Package },
+      { label: "Discounts", href: "/admin/discounts", icon: Ticket },
       { label: "Deliveries", href: "/admin/deliveries", icon: Truck },
       { label: "Customers", href: "/admin/customers", icon: Users },
     ],

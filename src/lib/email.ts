@@ -187,10 +187,20 @@ function renderOrderEmail(order: FullOrder, variant: "customer" | "admin") {
             <td style="padding:16px 0 4px;font-size:13px;color:#8C8069;">Subtotal</td>
             <td align="right" style="padding:16px 0 4px;font-size:13px;color:#17130F;">${formatPrice(order.subtotal)}</td>
           </tr>
+          ${
+            order.discount > 0
+              ? `<tr><td style="padding:4px 0;font-size:13px;color:#3F7D5A;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</td><td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">−${formatPrice(order.discount)}</td></tr>`
+              : ""
+          }
           <tr>
             <td style="padding:4px 0;font-size:13px;color:#8C8069;">Shipping</td>
             <td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">${order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</td>
           </tr>
+          ${
+            order.tax > 0
+              ? `<tr><td style="padding:4px 0;font-size:13px;color:#8C8069;">Tax</td><td align="right" style="padding:4px 0;font-size:13px;color:#17130F;">${formatPrice(order.tax)}</td></tr>`
+              : ""
+          }
           <tr>
             <td style="padding:12px 0 0;font-family:Georgia,serif;font-size:18px;color:#17130F;border-top:1px solid #DDD6C9;">Total</td>
             <td align="right" style="padding:12px 0 0;font-family:Georgia,serif;font-size:18px;color:#17130F;border-top:1px solid #DDD6C9;">${formatPrice(order.total)}</td>

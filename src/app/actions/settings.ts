@@ -20,6 +20,8 @@ async function persist(patch: Partial<SiteConfig>) {
   revalidateTag("site-config");
   revalidatePath("/");
   revalidatePath("/about");
+  revalidatePath("/cart");
+  revalidatePath("/checkout");
   revalidatePath("/admin/settings");
 }
 
@@ -41,4 +43,15 @@ export async function saveHomepage(home: SiteConfig["home"]) {
 export async function saveAbout(about: SiteConfig["about"]) {
   await guard();
   await persist({ about });
+}
+
+export async function saveCheckout(checkout: SiteConfig["checkout"]) {
+  await guard();
+  await persist({
+    checkout: {
+      freeShippingThreshold: Math.max(0, Math.round(Number(checkout.freeShippingThreshold) || 0)),
+      shippingFlat: Math.max(0, Math.round(Number(checkout.shippingFlat) || 0)),
+      taxRatePct: Math.max(0, Math.min(100, Number(checkout.taxRatePct) || 0)),
+    },
+  });
 }

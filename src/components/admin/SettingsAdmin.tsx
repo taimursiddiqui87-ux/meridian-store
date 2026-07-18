@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Store, LayoutGrid, FileText, Megaphone, Check, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Store, LayoutGrid, FileText, Megaphone, Truck, Check, Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageHeader, Card, CardHead } from "@/components/admin/AdminUI";
 import type { SiteConfig, HomeSection } from "@/lib/settings";
@@ -12,6 +12,7 @@ import {
   saveHomepage,
   saveAbout,
   saveAnnouncements,
+  saveCheckout,
 } from "@/app/actions/settings";
 
 type CatalogItem = { slug: string; name: string; category: string; image: string };
@@ -20,6 +21,7 @@ const tabs = [
   { id: "store", label: "Store profile", icon: Store },
   { id: "home", label: "Homepage", icon: LayoutGrid },
   { id: "about", label: "About page", icon: FileText },
+  { id: "checkout", label: "Checkout", icon: Truck },
   { id: "announce", label: "Announcements", icon: Megaphone },
 ] as const;
 
@@ -242,6 +244,56 @@ export function SettingsAdmin({
             </Card>
           )}
 
+          {/* CHECKOUT */}
+          {tab === "checkout" && (
+            <Card>
+              <CardHead title="Shipping & tax" />
+              <div className="space-y-5 p-5">
+                <p className="text-[13px] text-ink-muted">
+                  Control what customers pay for shipping and tax. Money amounts are in whole units of
+                  your store currency.
+                </p>
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field label="Flat shipping rate ($)">
+                    <input
+                      type="number"
+                      min={0}
+                      className="field-input"
+                      value={cfg.checkout.shippingFlat ? Math.round(cfg.checkout.shippingFlat / 100) : ""}
+                      onChange={(e) => setCheckout("shippingFlat", Math.max(0, Math.round(Number(e.target.value) || 0)) * 100)}
+                    />
+                  </Field>
+                  <Field label="Free shipping over ($ · 0 disables)">
+                    <input
+                      type="number"
+                      min={0}
+                      className="field-input"
+                      value={cfg.checkout.freeShippingThreshold ? Math.round(cfg.checkout.freeShippingThreshold / 100) : ""}
+                      onChange={(e) => setCheckout("freeShippingThreshold", Math.max(0, Math.round(Number(e.target.value) || 0)) * 100)}
+                    />
+                  </Field>
+                  <Field label="Tax rate (%)">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      className="field-input"
+                      value={cfg.checkout.taxRatePct || ""}
+                      onChange={(e) => setCheckout("taxRatePct", Math.max(0, Math.min(100, Number(e.target.value) || 0)))}
+                    />
+                  </Field>
+                </div>
+                <p className="text-[12px] text-stone-400">
+                  Example: a $15 flat rate with free shipping over $150 and 0% tax. Orders at or above
+                  the free-shipping threshold ship free automatically.
+                </p>
+              </div>
+              <div className="flex justify-end border-t border-stone-100 px-5 py-4">
+                <SaveButton label="checkout" onClick={() => run("checkout", () => saveCheckout(cfg.checkout))} />
+              </div>
+            </Card>
+          )}
+
           {/* ANNOUNCEMENTS */}
           {tab === "announce" && (
             <Card>
@@ -292,6 +344,10 @@ export function SettingsAdmin({
   }
   function setAbout<K extends keyof SiteConfig["about"]>(k: K, v: SiteConfig["about"][K]) {
     setCfg({ ...cfg, about: { ...cfg.about, [k]: v } });
+    setSaved(null);
+  }
+  function setCheckout<K extends keyof SiteConfig["checkout"]>(k: K, v: SiteConfig["checkout"][K]) {
+    setCfg({ ...cfg, checkout: { ...cfg.checkout, [k]: v } });
     setSaved(null);
   }
   function setValue(i: number, k: "title" | "body", v: string) {

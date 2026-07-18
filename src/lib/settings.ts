@@ -38,6 +38,11 @@ export interface SiteConfig {
     storyTitle: string;
     storyBody: string;
   };
+  checkout: {
+    freeShippingThreshold: number; // integer cents; 0 disables the free-shipping tier
+    shippingFlat: number; // integer cents charged when the order is below the threshold
+    taxRatePct: number; // percentage applied to the discounted subtotal
+  };
 }
 
 export const DEFAULT_CONFIG: SiteConfig = {
@@ -106,6 +111,11 @@ export const DEFAULT_CONFIG: SiteConfig = {
     storyBody:
       "From the first turn of the crown to the final pressure test, a single watchmaker sees each Meridian through. It’s slower. It’s more expensive. And it’s the only way we know how to build something worth keeping.",
   },
+  checkout: {
+    freeShippingThreshold: 15000, // free shipping at $150+
+    shippingFlat: 1500, // $15 flat otherwise
+    taxRatePct: 0, // no tax by default
+  },
 };
 
 /** Deep-merge stored config over the defaults so new fields always resolve. */
@@ -128,6 +138,7 @@ export function mergeConfig(stored: Partial<SiteConfig> | null | undefined): Sit
       values: s.about?.values?.length ? s.about.values : DEFAULT_CONFIG.about.values,
       stats: s.about?.stats?.length ? s.about.stats : DEFAULT_CONFIG.about.stats,
     },
+    checkout: { ...DEFAULT_CONFIG.checkout, ...(s.checkout ?? {}) },
   };
 }
 

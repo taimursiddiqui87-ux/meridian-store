@@ -4,6 +4,9 @@ import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { sendOrderEmails } from "@/lib/email";
+import { getSiteConfig } from "@/lib/settings";
+import { computeTotals } from "@/lib/pricing";
+import { validateCoupon } from "@/app/actions/coupons";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const METHODS = ["cod", "card", "jazzcash", "easypaisa"] as const;
@@ -29,6 +32,7 @@ export interface CheckoutInput {
   postalCode: string;
   country: string;
   method: string;
+  couponCode?: string;
   lines: CheckoutLine[];
 }
 
@@ -97,9 +101,20 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   }
 
   const subtotal = input.lines.reduce((n, l) => n + l.price * l.quantity, 0);
-  const shipping = 0;
-  const tax = 0;
-  const total = subtotal + shipping + tax;
+
+  // Re-validate any promo code server-side, then compute shipping + tax from
+  // the store's configured checkout rules (never trust client-sent totals).
+  let discount = 0;
+  let couponCode: string | null = null;
+  if (input.couponCode?.trim()) {
+    const c = await validateCoupon(input.couponCode, subtotal);
+    if (c.ok && c.discount) {
+      discount = c.discount;
+      couponCode = c.code ?? null;
+    }
+  }
+  const { checkout: rules } = await getSiteConfig();
+  const { shipping, tax, total } = computeTotals(subtotal, rules, discount);
   const orderNumber = "MER-" + Date.now().toString().slice(-6);
 
   // COD is settled on delivery (unpaid); the gateway methods run in demo mode
@@ -120,6 +135,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         paymentMethod: method,
         currency: "usd",
         subtotal,
+        discount,
+        couponCode,
         shipping,
         tax,
         total,

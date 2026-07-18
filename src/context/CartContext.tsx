@@ -16,6 +16,8 @@ interface CartContextValue {
   isOpen: boolean;
   count: number;
   subtotal: number;
+  couponCode: string;
+  setCouponCode: (code: string) => void;
   add: (line: Omit<CartLine, "quantity">, qty?: number) => void;
   remove: (productId: string, variant: string) => void;
   setQty: (productId: string, variant: string, qty: number) => void;
@@ -26,17 +28,21 @@ interface CartContextValue {
 
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "meridian.cart.v1";
+const COUPON_KEY = "meridian.coupon.v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
+  const [couponCode, setCouponCodeState] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Load persisted cart once on mount.
+  // Load persisted cart + coupon once on mount.
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setLines(JSON.parse(raw));
+      const code = localStorage.getItem(COUPON_KEY);
+      if (code) setCouponCodeState(code);
     } catch {
       /* ignore */
     }
@@ -49,10 +55,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (!loaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
+      localStorage.setItem(COUPON_KEY, couponCode);
     } catch {
       /* ignore */
     }
-  }, [lines, loaded]);
+  }, [lines, couponCode, loaded]);
 
   // Lock scroll when the drawer is open.
   useEffect(() => {
@@ -101,7 +108,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => {
+    setLines([]);
+    setCouponCodeState("");
+  }, []);
+  const setCouponCode = useCallback((code: string) => setCouponCodeState(code), []);
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
@@ -119,6 +130,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isOpen,
     count,
     subtotal,
+    couponCode,
+    setCouponCode,
     add,
     remove,
     setQty,

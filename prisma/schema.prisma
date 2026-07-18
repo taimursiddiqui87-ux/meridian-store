@@ -42,6 +42,8 @@ model Order {
   paymentMethod   String      @default("cod") // cod | card | jazzcash | easypaisa
   currency        String      @default("usd")
   subtotal        Int // integer cents
+  discount        Int         @default(0)
+  couponCode      String?
   shipping        Int         @default(0)
   tax             Int         @default(0)
   total           Int
@@ -104,6 +106,18 @@ model Product {
   updatedAt        DateTime @updatedAt
 
   @@index([category, active, sortOrder])
+}
+
+model Coupon {
+  id          String    @id @default(cuid())
+  code        String    @unique // stored uppercased
+  type        String    @default("percent") // percent | fixed
+  value       Int // percent (1–100) or fixed amount in cents
+  active      Boolean   @default(true)
+  minSubtotal Int       @default(0) // minimum order subtotal in cents
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Banner {
