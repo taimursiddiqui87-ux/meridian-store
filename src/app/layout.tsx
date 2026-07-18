@@ -2,27 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { Chrome } from "@/components/layout/Chrome";
+import { getSiteConfig } from "@/lib/settings";
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://meridian.example"),
-  title: {
-    default: "MERIDIAN — Timeless by design",
-    template: "%s · MERIDIAN",
-  },
-  description:
-    "Hand-finished automatic timepieces engineered to be worn for a lifetime. Free worldwide shipping, 2-year warranty and complimentary engraving.",
-  openGraph: {
-    title: "MERIDIAN — Timeless by design",
-    description: "Hand-finished automatic timepieces, built to be handed down.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { store } = await getSiteConfig();
+  return {
+    metadataBase: new URL("https://meridian.example"),
+    title: {
+      default: `${store.name} — ${store.tagline}`,
+      template: `%s · ${store.name}`,
+    },
+    description:
+      "Hand-finished automatic timepieces engineered to be worn for a lifetime. Free worldwide shipping, 2-year warranty and complimentary engraving.",
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const config = await getSiteConfig();
   return (
     <html lang="en">
       <head>
@@ -35,7 +35,9 @@ export default function RootLayout({
       </head>
       <body>
         <CartProvider>
-          <Chrome>{children}</Chrome>
+          <Chrome store={config.store} announcements={config.announcements}>
+            {children}
+          </Chrome>
         </CartProvider>
       </body>
     </html>

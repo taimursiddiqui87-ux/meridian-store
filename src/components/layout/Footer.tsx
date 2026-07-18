@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Instagram, Facebook, Youtube, Twitter, Mail, ArrowRight } from "lucide-react";
-import { BRAND } from "@/lib/data";
+import type { SiteConfig } from "@/lib/settings";
 
 const columns = [
   {
@@ -37,14 +37,20 @@ const columns = [
 
 const payments = ["Cash on Delivery", "Visa", "Mastercard", "JazzCash", "Easypaisa"];
 
-export function Footer() {
+export function Footer({ store }: { store: SiteConfig["store"] }) {
+  const socials = [
+    { Icon: Instagram, href: store.instagram || "#" },
+    { Icon: Facebook, href: store.facebook || "#" },
+    { Icon: Youtube, href: store.youtube || "#" },
+    { Icon: Twitter, href: store.twitter || "#" },
+  ];
   return (
     <footer className="mt-24 bg-ink text-paper">
       {/* Newsletter */}
       <div className="border-b border-white/10">
         <div className="container-luxe grid gap-8 py-14 lg:grid-cols-2 lg:items-center lg:py-16">
           <div>
-            <p className="eyebrow text-brass-400">The Meridian List</p>
+            <p className="eyebrow text-brass-400">The Insider List</p>
             <h3 className="mt-3 max-w-md font-serif text-3xl leading-tight text-paper sm:text-4xl">
               Early access, private releases and 10% off your first order.
             </h3>
@@ -69,16 +75,16 @@ export function Footer() {
       {/* Links */}
       <div className="container-luxe grid grid-cols-2 gap-10 py-14 md:grid-cols-4 lg:grid-cols-5">
         <div className="col-span-2 lg:col-span-2">
-          <span className="font-serif text-3xl font-semibold tracking-[0.14em]">{BRAND.name}</span>
+          <span className="font-serif text-3xl font-semibold tracking-[0.14em]">{store.name}</span>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-paper/60">
-            {BRAND.tagline} Hand-finished timepieces and considered essentials, designed in-house and built
+            {store.tagline} Hand-finished pieces and considered essentials, designed in-house and built
             to be handed down.
           </p>
           <div className="mt-6 flex gap-3">
-            {[Instagram, Facebook, Youtube, Twitter].map((Icon, i) => (
+            {socials.map(({ Icon, href }, i) => (
               <a
                 key={i}
-                href="#"
+                href={href}
                 aria-label="Social link"
                 className="grid h-10 w-10 place-items-center rounded-full border border-white/15 text-paper/70 transition-colors hover:border-brass-400 hover:text-brass-400"
               >
@@ -111,7 +117,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container-luxe flex flex-col items-center justify-between gap-5 py-6 sm:flex-row">
           <p className="text-[12px] text-paper/50">
-            © {new Date().getFullYear()} {BRAND.name}. All rights reserved.
+            © {new Date().getFullYear()} {store.name}. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {payments.map((p) => (

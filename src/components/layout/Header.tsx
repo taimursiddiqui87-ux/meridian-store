@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search, User, ShoppingBag, Menu, X, ChevronRight, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { BRAND, products } from "@/lib/data";
+import { products } from "@/lib/data";
 import { useCart } from "@/context/CartContext";
 import { logoutAction } from "@/app/actions/auth";
 
@@ -21,7 +21,13 @@ const nav: NavItem[] = [
 
 const watchCatalog = products.filter((p) => p.category === "watches");
 
-export function Header() {
+export function Header({
+  storeName,
+  established,
+}: {
+  storeName: string;
+  established: string;
+}) {
   const { count, openCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -158,13 +164,13 @@ export function Header() {
           <Link
             href="/"
             className="shrink-0 text-center"
-            aria-label={`${BRAND.name} home`}
+            aria-label={`${storeName} home`}
           >
             <span className="block font-serif text-[26px] font-semibold leading-none tracking-[0.16em] text-ink">
-              {BRAND.name}
+              {storeName}
             </span>
             <span className="mt-0.5 hidden text-[8px] uppercase tracking-luxe text-stone-400 sm:block">
-              {BRAND.established}
+              {established}
             </span>
           </Link>
 
@@ -248,7 +254,7 @@ export function Header() {
           )}
         >
           <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
-            <span className="font-serif text-xl font-semibold tracking-[0.14em]">{BRAND.name}</span>
+            <span className="font-serif text-xl font-semibold tracking-[0.14em]">{storeName}</span>
             <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-ink">
               <X size={22} strokeWidth={1.5} />
             </button>

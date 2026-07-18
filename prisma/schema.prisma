@@ -55,6 +55,12 @@ model OrderItem {
   image     String
 }
 
+model SiteSettings {
+  id        String   @id @default("main")
+  config    Json
+  updatedAt DateTime @updatedAt
+}
+
 model Banner {
   id             String   @id @default(cuid())
   kind           String   @default("hero") // hero (carousel) | promo

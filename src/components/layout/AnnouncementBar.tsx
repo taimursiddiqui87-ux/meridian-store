@@ -1,7 +1,6 @@
-import { marqueeItems } from "@/lib/data";
-
-export function AnnouncementBar() {
-  const items = [...marqueeItems, ...marqueeItems];
+export function AnnouncementBar({ messages }: { messages: string[] }) {
+  const list = messages.length ? messages : ["Free worldwide shipping"];
+  const items = [...list, ...list];
   return (
     <div className="group border-b border-white/5 bg-ink text-paper">
       <div className="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused]">
