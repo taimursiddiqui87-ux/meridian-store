@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { sendOrderEmails } from "@/lib/email";
@@ -52,6 +53,32 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const method: PaymentMethod = (METHODS as readonly string[]).includes(input.method)
     ? (input.method as PaymentMethod)
     : "cod";
+
+  // Inventory check — only enforced for catalog products that exist in the DB
+  // (items served from the static seed fallback are treated as always available).
+  let dbStock = new Map<string, { name: string; stock: number }>();
+  try {
+    const ids = input.lines.map((l) => l.productId);
+    const rows = await prisma.product.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, name: true, stock: true },
+    });
+    dbStock = new Map(rows.map((r) => [r.id, { name: r.name, stock: r.stock }]));
+    for (const line of input.lines) {
+      const p = dbStock.get(line.productId);
+      if (p && p.stock < line.quantity) {
+        return {
+          ok: false,
+          error:
+            p.stock <= 0
+              ? `"${p.name}" is out of stock.`
+              : `Only ${p.stock} of "${p.name}" left in stock.`,
+        };
+      }
+    }
+  } catch {
+    dbStock = new Map(); // DB unreachable → skip enforcement rather than block checkout
+  }
 
   const session = await getSession();
   // Only attach the order to a user that still exists (a stale session for a
@@ -111,6 +138,24 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
       },
       include: { items: true },
     });
+
+    // Decrement inventory for DB-backed products; flag any that reach zero.
+    const decrements = input.lines.filter((l) => dbStock.has(l.productId));
+    if (decrements.length) {
+      await prisma.$transaction(
+        decrements.map((l) =>
+          prisma.product.update({
+            where: { id: l.productId },
+            data: { stock: { decrement: l.quantity } },
+          }),
+        ),
+      );
+      await prisma.product.updateMany({
+        where: { id: { in: decrements.map((l) => l.productId) }, stock: { lte: 0 } },
+        data: { inStock: false },
+      });
+      revalidateTag("products");
+    }
 
     await sendOrderEmails(order); // customer confirmation + admin notification (no-op until RESEND_API_KEY is set)
 

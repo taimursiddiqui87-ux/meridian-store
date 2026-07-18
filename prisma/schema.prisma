@@ -36,6 +36,7 @@ model Order {
   paymentRef      String?     @unique // gateway transaction reference
   customerName    String?
   shippingAddress String?
+  trackingNumber  String? // set when the order is dispatched
   createdAt       DateTime    @default(now())
   items           OrderItem[]
 

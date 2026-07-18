@@ -27,6 +27,8 @@ export function ProductDetail({ product }: { product: Product }) {
   const [variant, setVariant] = useState(product.variants[0]);
   const [qty, setQty] = useState(1);
   const onSale = !!product.compareAtPrice && product.compareAtPrice > product.price;
+  const outOfStock = !product.inStock || product.stock <= 0;
+  const lowStock = !outOfStock && product.stock <= 10;
   const category = getCategory(product.category);
   const trustItems =
     product.category === "perfumes"
@@ -44,6 +46,7 @@ export function ProductDetail({ product }: { product: Product }) {
         ];
 
   const handleAdd = (thenCheckout = false) => {
+    if (outOfStock) return;
     add(
       {
         productId: product.id,
@@ -179,19 +182,32 @@ export function ProductDetail({ product }: { product: Product }) {
                 <Plus size={16} />
               </button>
             </div>
-            <button onClick={() => handleAdd(false)} className="btn-primary h-14 flex-1">
-              Add to Cart — {formatPrice(product.price * qty)}
+            <button
+              onClick={() => handleAdd(false)}
+              disabled={outOfStock}
+              className={cn("btn-primary h-14 flex-1", outOfStock && "cursor-not-allowed opacity-50")}
+            >
+              {outOfStock ? "Out of stock" : `Add to Cart — ${formatPrice(product.price * qty)}`}
             </button>
           </div>
-          <button
-            onClick={() => handleAdd(true)}
-            className="btn-gold mt-3 h-14 w-full"
-          >
-            Buy it now
-          </button>
+          {!outOfStock && (
+            <button onClick={() => handleAdd(true)} className="btn-gold mt-3 h-14 w-full">
+              Buy it now
+            </button>
+          )}
 
-          <div className="mt-4 flex items-center gap-2 text-[13px] text-success">
-            <Check size={16} /> In stock · Ships within 24 hours
+          <div className="mt-4 flex items-center gap-2 text-[13px]">
+            {outOfStock ? (
+              <span className="text-danger">Currently out of stock — check back soon.</span>
+            ) : lowStock ? (
+              <span className="flex items-center gap-2 text-brass-700">
+                <Check size={16} /> Only {product.stock} left · ships within 24 hours
+              </span>
+            ) : (
+              <span className="flex items-center gap-2 text-success">
+                <Check size={16} /> In stock · ships within 24 hours
+              </span>
+            )}
           </div>
 
           {/* Trust */}

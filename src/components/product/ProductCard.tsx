@@ -24,11 +24,13 @@ export function ProductCard({
 }) {
   const { add } = useCart();
   const onSale = !!product.compareAtPrice && product.compareAtPrice > product.price;
+  const outOfStock = !product.inStock || product.stock <= 0;
   const hasHover = product.images.length > 1;
 
   const quickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     add({
       productId: product.id,
       slug: product.slug,
@@ -87,9 +89,15 @@ export function ProductCard({
           <button
             type="button"
             onClick={quickAdd}
-            className="flex w-full items-center justify-center gap-2 bg-paper/95 py-3.5 text-[11px] font-medium uppercase tracking-wider2 text-ink backdrop-blur transition-colors duration-300 hover:bg-ink hover:text-paper"
+            disabled={outOfStock}
+            className={cn(
+              "flex w-full items-center justify-center gap-2 py-3.5 text-[11px] font-medium uppercase tracking-wider2 backdrop-blur transition-colors duration-300",
+              outOfStock
+                ? "cursor-not-allowed bg-stone-200/90 text-stone-500"
+                : "bg-paper/95 text-ink hover:bg-ink hover:text-paper",
+            )}
           >
-            <Plus size={15} /> Quick add
+            {outOfStock ? "Out of stock" : (<><Plus size={15} /> Quick add</>)}
           </button>
         </div>
       </div>

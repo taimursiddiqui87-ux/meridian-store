@@ -66,6 +66,12 @@ export default async function OrdersPage() {
                       <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Total</p>
                       <p className="tabular-nums">{formatPrice(o.total)}</p>
                     </div>
+                    {o.trackingNumber && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Tracking</p>
+                        <p className="font-medium">{o.trackingNumber}</p>
+                      </div>
+                    )}
                   </div>
                   <OrderStatusPill status={o.status} />
                 </div>

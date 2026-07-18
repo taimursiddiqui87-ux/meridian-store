@@ -15,6 +15,7 @@ const methodLabel: Record<string, string> = {
 export default async function AdminOrdersPage() {
   const orders = await getAllOrders();
   const rows: OrderRow[] = orders.map((o) => ({
+    orderId: o.id,
     id: o.orderNumber,
     customer: o.customerName || "Guest",
     email: o.email,
@@ -22,6 +23,7 @@ export default async function AdminOrdersPage() {
     items: o.items.reduce((n, i) => n + i.quantity, 0),
     total: formatPrice(o.total),
     status: cap(o.status),
+    statusKey: o.status,
     date: new Date(o.createdAt).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
@@ -29,6 +31,14 @@ export default async function AdminOrdersPage() {
       minute: "2-digit",
     }),
     payment: methodLabel[o.paymentMethod] ?? o.paymentMethod,
+    address: o.shippingAddress || "",
+    tracking: o.trackingNumber || "",
+    lineItems: o.items.map((i) => ({
+      name: i.name,
+      variant: i.variant,
+      quantity: i.quantity,
+      price: formatPrice(i.price),
+    })),
   }));
 
   return <OrdersAdmin orders={rows} />;
