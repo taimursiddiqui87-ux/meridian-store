@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -52,7 +52,19 @@ const nav: { section: string; items: NavItem[] }[] = [
   },
 ];
 
-function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function SidebarContent({
+  pathname,
+  onNavigate,
+  displayName,
+  initials,
+  email,
+}: {
+  pathname: string;
+  onNavigate?: () => void;
+  displayName: string;
+  initials: string;
+  email?: string;
+}) {
   return (
     <div className="flex h-full flex-col bg-ink text-paper">
       <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
@@ -110,11 +122,11 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         </Link>
         <div className="flex items-center gap-3 rounded-lg px-3 py-2">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-brass-500 text-[13px] font-semibold text-ink">
-            BA
+            {initials}
           </span>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-medium">Basel A.</p>
-            <p className="truncate text-[11px] text-paper/40">Store owner</p>
+            <p className="truncate text-[13px] font-medium">{displayName}</p>
+            <p className="truncate text-[11px] text-paper/40">{email || "Administrator"}</p>
           </div>
           <ChevronDown size={15} className="text-paper/40" />
         </div>
@@ -126,12 +138,28 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? "/admin";
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<{ name?: string | null; email?: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => r.json())
+      .then((d) => setUser(d.user))
+      .catch(() => {});
+  }, []);
+
+  const displayName = user?.name || "Store Owner";
+  const initials = (user?.name || "Meridian")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="min-h-screen bg-[#F4F2EC] text-ink">
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">
-        <SidebarContent pathname={pathname} />
+        <SidebarContent pathname={pathname} displayName={displayName} initials={initials} email={user?.email} />
       </aside>
 
       {/* Mobile drawer */}
@@ -149,7 +177,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             mobileOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <SidebarContent pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+          <SidebarContent
+            pathname={pathname}
+            onNavigate={() => setMobileOpen(false)}
+            displayName={displayName}
+            initials={initials}
+            email={user?.email}
+          />
         </div>
       </div>
 

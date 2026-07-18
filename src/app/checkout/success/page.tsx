@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, Mail } from "lucide-react";
+import { CheckCircle2, Mail, Banknote } from "lucide-react";
 import type { Order, OrderItem } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
@@ -8,24 +8,31 @@ import { ClearCart } from "@/components/cart/ClearCart";
 
 export const dynamic = "force-dynamic";
 
+const methodLabel: Record<string, string> = {
+  cod: "Cash on Delivery",
+  card: "Credit / Debit Card",
+  jazzcash: "JazzCash",
+  easypaisa: "Easypaisa",
+};
+
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: { session_id?: string };
+  searchParams: { order?: string };
 }) {
-  const sessionId = searchParams.session_id;
   let order: (Order & { items: OrderItem[] }) | null = null;
-
-  if (sessionId) {
+  if (searchParams.order) {
     try {
       order = await prisma.order.findUnique({
-        where: { stripeSessionId: sessionId },
+        where: { id: searchParams.order },
         include: { items: true },
       });
     } catch {
       order = null;
     }
   }
+
+  const isCod = order?.paymentMethod === "cod";
 
   return (
     <div className="container-luxe py-16 lg:py-24">
@@ -37,20 +44,25 @@ export default async function CheckoutSuccessPage({
         <h1 className="mt-6 font-serif text-4xl sm:text-5xl">Thank you for your order</h1>
         {order ? (
           <p className="mt-3 text-ink-muted">
-            Order <span className="font-medium text-ink">#{order.orderNumber}</span> is confirmed and
-            being prepared.
+            Order <span className="font-medium text-ink">#{order.orderNumber}</span> is confirmed
+            {order.paymentMethod ? <> · {methodLabel[order.paymentMethod] ?? order.paymentMethod}</> : null}.
           </p>
         ) : (
-          <p className="mt-3 text-ink-muted">Your payment was received and your order is confirmed.</p>
+          <p className="mt-3 text-ink-muted">Your order is confirmed and being prepared.</p>
         )}
 
-        <div className="mt-6 flex items-center justify-center gap-2 border-y border-stone-200 py-4 text-sm text-ink-soft">
+        {isCod && order && (
+          <div className="mt-6 flex items-center justify-center gap-2 border border-brass-200 bg-brass-50 px-5 py-4 text-sm text-ink-soft">
+            <Banknote size={18} className="text-brass-600" />
+            Please keep <strong className="text-ink">{formatPrice(order.total)}</strong> ready — you’ll
+            pay in cash when your order arrives.
+          </div>
+        )}
+
+        <div className="mt-4 flex items-center justify-center gap-2 border-y border-stone-200 py-4 text-sm text-ink-soft">
           <Mail size={17} className="text-brass-600" />
-          A confirmation email {order?.email ? (
-            <>has been sent to <strong className="text-ink">{order.email}</strong></>
-          ) : (
-            <>is on its way to your inbox</>
-          )}
+          A confirmation email is on its way to{" "}
+          <strong className="text-ink">{order?.email ?? "your inbox"}</strong>
         </div>
 
         {order && (
@@ -70,7 +82,7 @@ export default async function CheckoutSuccessPage({
               ))}
             </ul>
             <div className="flex items-center justify-between border-t border-stone-200 px-4 py-4">
-              <span className="text-[13px] uppercase tracking-wider2 text-ink-muted">Total paid</span>
+              <span className="text-[13px] uppercase tracking-wider2 text-ink-muted">Total</span>
               <span className="font-serif text-2xl tabular-nums">{formatPrice(order.total)}</span>
             </div>
           </div>

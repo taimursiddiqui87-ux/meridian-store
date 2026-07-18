@@ -3,35 +3,58 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Lock, ShieldCheck, Truck, ArrowRight, AlertCircle, CreditCard } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Banknote, CreditCard, ShieldCheck, Truck, AlertCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { BRAND } from "@/lib/data";
+import { placeOrder } from "@/app/actions/checkout";
+
+const methods = [
+  { id: "cod", label: "Cash on Delivery", desc: "Pay in cash when your order arrives", live: true },
+  { id: "card", label: "Credit / Debit Card", desc: "Visa · Mastercard", live: false },
+  { id: "jazzcash", label: "JazzCash", desc: "Mobile wallet & cards", live: false },
+  { id: "easypaisa", label: "Easypaisa", desc: "Mobile wallet & cards", live: false },
+];
+
+const brandMark: Record<string, { bg: string; text: string; label: string }> = {
+  jazzcash: { bg: "#B01C2E", text: "#fff", label: "JC" },
+  easypaisa: { bg: "#1FA64A", text: "#fff", label: "ep" },
+};
 
 export default function CheckoutPage() {
   const { lines, subtotal, count } = useCart();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [method, setMethod] = useState("cod");
+  const [form, setForm] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    country: "Pakistan",
+  });
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   useEffect(() => setMounted(true), []);
 
-  const pay = async () => {
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lines }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.url) {
-        setError(data.error ?? "Checkout could not be started.");
+      const res = await placeOrder({ ...form, method, lines });
+      if (!res.ok || !res.orderId) {
+        setError(res.error ?? "Could not place your order.");
         setLoading(false);
         return;
       }
-      window.location.href = data.url;
+      router.push(`/checkout/success?order=${res.orderId}`);
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -48,63 +71,152 @@ export default function CheckoutPage() {
         <div>
           <h1 className="font-serif text-4xl">Your cart is empty</h1>
           <p className="mt-3 text-ink-muted">Add a piece before checking out.</p>
-          <Link href="/shop" className="btn-primary mt-8">Browse watches</Link>
+          <Link href="/shop" className="btn-primary mt-8">Browse the store</Link>
         </div>
       </div>
     );
   }
 
+  const selected = methods.find((m) => m.id === method);
+
   return (
     <div className="border-t border-stone-200">
-      <div className="mx-auto grid max-w-6xl lg:grid-cols-[1fr_440px]">
-        {/* Left — review & pay */}
-        <div className="px-5 py-10 sm:px-10 lg:py-16">
-          <div className="mx-auto max-w-lg">
+      <form onSubmit={submit} className="mx-auto grid max-w-6xl lg:grid-cols-[1fr_440px]">
+        {/* Left — details + payment */}
+        <div className="px-5 py-10 sm:px-10 lg:py-14">
+          <div className="mx-auto max-w-lg space-y-8">
             <Link href="/" className="font-serif text-2xl font-semibold tracking-[0.14em]">
               {BRAND.name}
             </Link>
 
-            <h1 className="mt-8 font-serif text-3xl">Secure checkout</h1>
-            <p className="mt-2 text-sm text-ink-muted">
-              You’ll enter your card and shipping details on Stripe’s secure, encrypted payment page —
-              then land right back here.
-            </p>
-
             {error && (
-              <div className="mt-6 flex items-start gap-2 border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
+              <div className="flex items-start gap-2 border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
                 {error}
               </div>
             )}
 
-            <div className="mt-8 space-y-3">
-              {[
-                { icon: Lock, title: "Encrypted & secure", desc: "Card details handled entirely by Stripe — we never see them." },
-                { icon: Truck, title: "Free insured shipping", desc: "Dispatched within 24 hours, tracked to your door." },
-                { icon: ShieldCheck, title: "2-year warranty", desc: "Plus 30-day returns, no questions asked." },
-              ].map((f) => (
-                <div key={f.title} className="flex items-start gap-4 border border-stone-200 px-5 py-4">
-                  <f.icon size={20} strokeWidth={1.5} className="mt-0.5 shrink-0 text-brass-600" />
-                  <div>
-                    <p className="text-sm font-medium text-ink">{f.title}</p>
-                    <p className="text-[12.5px] text-ink-muted">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Contact */}
+            <section>
+              <h2 className="mb-4 font-serif text-2xl">Contact</h2>
+              <label className="field-label">Email address</label>
+              <input
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => set({ email: e.target.value })}
+                placeholder="you@email.com"
+                className="field-input"
+              />
+            </section>
 
-            <button onClick={pay} disabled={loading} className="btn-primary mt-8 w-full">
-              {loading ? (
-                "Redirecting to secure payment…"
-              ) : (
-                <>
-                  <CreditCard size={17} /> Pay {formatPrice(subtotal)}
-                </>
-              )}
+            {/* Shipping */}
+            <section>
+              <h2 className="mb-4 font-serif text-2xl">Shipping address</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <input required value={form.firstName} onChange={(e) => set({ firstName: e.target.value })} placeholder="First name" className="field-input" />
+                <input required value={form.lastName} onChange={(e) => set({ lastName: e.target.value })} placeholder="Last name" className="field-input" />
+                <input required value={form.phone} onChange={(e) => set({ phone: e.target.value })} placeholder="Phone (e.g. 03xx-xxxxxxx)" className="field-input col-span-2" />
+                <input required value={form.address} onChange={(e) => set({ address: e.target.value })} placeholder="Address" className="field-input col-span-2" />
+                <input required value={form.city} onChange={(e) => set({ city: e.target.value })} placeholder="City" className="field-input" />
+                <input value={form.postalCode} onChange={(e) => set({ postalCode: e.target.value })} placeholder="Postal code" className="field-input" />
+                <input value={form.country} onChange={(e) => set({ country: e.target.value })} placeholder="Country" className="field-input col-span-2" />
+              </div>
+            </section>
+
+            {/* Payment */}
+            <section>
+              <h2 className="mb-4 font-serif text-2xl">Payment method</h2>
+              <div className="space-y-3">
+                {methods.map((m) => {
+                  const active = method === m.id;
+                  const mark = brandMark[m.id];
+                  return (
+                    <button
+                      type="button"
+                      key={m.id}
+                      onClick={() => setMethod(m.id)}
+                      className={cn(
+                        "flex w-full items-center gap-4 border px-4 py-4 text-left transition-colors",
+                        active ? "border-ink bg-white" : "border-stone-200 hover:border-stone-300",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "grid h-5 w-5 shrink-0 place-items-center rounded-full border",
+                          active ? "border-ink" : "border-stone-300",
+                        )}
+                      >
+                        {active && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
+                      </span>
+                      {m.id === "cod" ? (
+                        <Banknote size={22} className="text-brass-600" />
+                      ) : m.id === "card" ? (
+                        <CreditCard size={22} className="text-brass-600" />
+                      ) : (
+                        <span
+                          className="grid h-6 w-9 place-items-center rounded text-[11px] font-bold"
+                          style={{ backgroundColor: mark.bg, color: mark.text }}
+                        >
+                          {mark.label}
+                        </span>
+                      )}
+                      <span className="flex-1">
+                        <span className="block text-sm font-medium text-ink">{m.label}</span>
+                        <span className="block text-[12px] text-ink-muted">{m.desc}</span>
+                      </span>
+                      {m.live ? (
+                        <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-success">
+                          Live
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-stone-500">
+                          Demo
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Method-specific fields */}
+              <div className="mt-4">
+                {method === "cod" && (
+                  <p className="flex items-center gap-2 border border-brass-200 bg-brass-50 px-4 py-3 text-[13px] text-ink-soft">
+                    <Banknote size={16} className="shrink-0 text-brass-600" />
+                    Pay in cash when your order is delivered. No advance payment needed.
+                  </p>
+                )}
+                {method === "card" && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <input placeholder="Card number" className="field-input col-span-2" inputMode="numeric" />
+                    <input placeholder="Name on card" className="field-input col-span-2" />
+                    <input placeholder="MM / YY" className="field-input" inputMode="numeric" />
+                    <input placeholder="CVC" className="field-input" inputMode="numeric" />
+                  </div>
+                )}
+                {(method === "jazzcash" || method === "easypaisa") && (
+                  <input
+                    placeholder={`${selected?.label} mobile number (03xx-xxxxxxx)`}
+                    className="field-input"
+                    inputMode="numeric"
+                  />
+                )}
+                {method !== "cod" && (
+                  <p className="mt-2 text-[12px] text-stone-400">
+                    Demo mode — no real charge is made. Connect your {selected?.label} merchant account
+                    to accept live payments.
+                  </p>
+                )}
+              </div>
+            </section>
+
+            <button type="submit" disabled={loading} className="btn-primary w-full">
+              {loading ? "Placing your order…" : `Place order · ${formatPrice(subtotal)}`}
             </button>
             <Link
               href="/cart"
-              className="mt-3 block text-center text-[12px] uppercase tracking-wider2 text-ink-muted link-underline"
+              className="block text-center text-[12px] uppercase tracking-wider2 text-ink-muted link-underline"
             >
               ← Back to cart
             </Link>
@@ -112,7 +224,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Right — summary */}
-        <aside className="order-first border-b border-stone-200 bg-cream/40 px-5 py-8 sm:px-10 lg:order-last lg:border-b-0 lg:border-l lg:py-16">
+        <aside className="order-first border-b border-stone-200 bg-cream/40 px-5 py-8 sm:px-10 lg:order-last lg:border-b-0 lg:border-l lg:py-14">
           <div className="mx-auto max-w-md lg:sticky lg:top-24">
             <p className="label-caps text-ink-muted">Order summary · {count} {count === 1 ? "item" : "items"}</p>
             <ul className="mt-5 space-y-4">
@@ -147,9 +259,14 @@ export default function CheckoutPage() {
               <span className="text-[13px] uppercase tracking-wider2">Total</span>
               <span className="font-serif text-3xl tabular-nums">{formatPrice(subtotal)}</span>
             </div>
+
+            <div className="mt-6 space-y-2 border-t border-stone-200 pt-5 text-[12px] text-ink-muted">
+              <p className="flex items-center gap-2"><ShieldCheck size={14} className="text-brass-600" /> Secure checkout · 2-year warranty</p>
+              <p className="flex items-center gap-2"><Truck size={14} className="text-brass-600" /> Free insured delivery, 2–4 days</p>
+            </div>
           </div>
         </aside>
-      </div>
+      </form>
     </div>
   );
 }

@@ -35,7 +35,7 @@ const columns = [
   },
 ];
 
-const payments = ["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay", "Klarna"];
+const payments = ["Cash on Delivery", "Visa", "Mastercard", "JazzCash", "Easypaisa"];
 
 export function Footer() {
   return (

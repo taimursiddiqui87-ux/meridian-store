@@ -97,14 +97,10 @@ export default function AdminSettingsPage() {
           <Card>
             <CardHead title="Payment methods" />
             <ul className="divide-y divide-stone-50">
-              {["Credit & debit cards", "PayPal", "Apple Pay", "Klarna — pay in 3"].map((m, i) => (
+              {["Cash on Delivery", "Credit & debit cards", "JazzCash", "Easypaisa"].map((m) => (
                 <li key={m} className="flex items-center justify-between px-5 py-4">
                   <span className="text-[14px]">{m}</span>
-                  <span
-                    className={`flex h-6 w-11 items-center rounded-full p-0.5 ${
-                      i < 3 ? "justify-end bg-ink" : "justify-start bg-stone-300"
-                    }`}
-                  >
+                  <span className="flex h-6 w-11 items-center justify-end rounded-full bg-ink p-0.5">
                     <span className="h-5 w-5 rounded-full bg-white shadow" />
                   </span>
                 </li>

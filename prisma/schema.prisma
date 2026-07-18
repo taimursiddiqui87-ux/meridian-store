@@ -27,12 +27,13 @@ model Order {
   userId          String?
   user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   status          String      @default("pending") // pending | paid | fulfilled | cancelled
+  paymentMethod   String      @default("cod") // cod | card | jazzcash | easypaisa
   currency        String      @default("usd")
   subtotal        Int // integer cents
   shipping        Int         @default(0)
   tax             Int         @default(0)
   total           Int
-  stripeSessionId String?     @unique
+  paymentRef      String?     @unique // gateway transaction reference
   customerName    String?
   shippingAddress String?
   createdAt       DateTime    @default(now())

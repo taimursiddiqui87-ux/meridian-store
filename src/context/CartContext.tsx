@@ -30,6 +30,7 @@ const STORAGE_KEY = "meridian.cart.v1";
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   // Load persisted cart once on mount.
   useEffect(() => {
@@ -39,16 +40,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
+    setLoaded(true);
   }, []);
 
-  // Persist on change.
+  // Persist on change — but only after the initial load, so we never
+  // clobber a stored cart with the empty initial state on mount.
   useEffect(() => {
+    if (!loaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
     } catch {
       /* ignore */
     }
-  }, [lines]);
+  }, [lines, loaded]);
 
   // Lock scroll when the drawer is open.
   useEffect(() => {
