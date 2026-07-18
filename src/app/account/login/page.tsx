@@ -36,7 +36,7 @@ export default function LoginPage() {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <label className="field-label mb-0">Password</label>
-            <Link href="#" className="text-[12px] text-brass-600 link-underline">
+            <Link href="/account/forgot" className="text-[12px] text-brass-600 link-underline">
               Forgot?
             </Link>
           </div>

@@ -27,10 +27,9 @@ const columns = [
     title: "Company",
     links: [
       { label: "Our Story", href: "/about" },
-      { label: "The Journal", href: "/journal" },
-      { label: "Sustainability", href: "/sustainability" },
-      { label: "Careers", href: "/careers" },
-      { label: "Store Locator", href: "/stores" },
+      { label: "Contact Us", href: "/contact" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
     ],
   },
 ];

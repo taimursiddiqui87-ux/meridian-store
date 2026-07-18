@@ -20,6 +20,77 @@ export async function sendOrderEmails(order: FullOrder) {
   await Promise.allSettled([sendCustomerConfirmation(order), sendAdminNotification(order)]);
 }
 
+/** Emails a customer's contact-form message to the store admin. Returns true if dispatched. */
+export async function sendContactEmail(msg: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}): Promise<boolean> {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  if (!resend || !adminEmail) {
+    console.log("[email] contact message (not dispatched — email not configured):", msg);
+    return false;
+  }
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: adminEmail,
+      replyTo: msg.email,
+      subject: `Contact form: ${msg.subject || "New message"}`,
+      html: `
+      <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;">
+        <h2 style="font-family:Georgia,serif;">New contact message</h2>
+        <p><strong>From:</strong> ${msg.name} &lt;${msg.email}&gt;</p>
+        <p><strong>Subject:</strong> ${msg.subject || "—"}</p>
+        <hr style="border:none;border-top:1px solid #EEEAE2;"/>
+        <p style="white-space:pre-wrap;color:#4A4237;">${msg.message.replace(/</g, "&lt;")}</p>
+      </div>`,
+    });
+    return true;
+  } catch (e) {
+    console.error("[email] contact message failed", e);
+    return false;
+  }
+}
+
+/** Sends a password-reset link. Returns true if an email was actually dispatched. */
+export async function sendPasswordResetEmail(to: string, link: string): Promise<boolean> {
+  if (!resend) {
+    console.log("[email] RESEND_API_KEY not set — password reset link for", to, "→", link);
+    return false;
+  }
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Reset your MERIDIAN password",
+      html: `
+      <div style="background:#F6F1E9;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
+        <div style="max-width:520px;margin:0 auto;background:#FBF9F5;border:1px solid #EEEAE2;">
+          <div style="background:#17130F;padding:28px;text-align:center;">
+            <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:4px;color:#FBF9F5;">MERIDIAN</div>
+          </div>
+          <div style="padding:32px 28px;">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#B0863F;">Password reset</div>
+            <h1 style="font-family:Georgia,serif;font-size:26px;color:#17130F;margin:8px 0 12px;">Reset your password</h1>
+            <p style="font-size:14px;color:#4A4237;margin:0 0 24px;">
+              We received a request to reset your password. This link expires in 1 hour.
+              If you didn't ask for this, you can safely ignore this email.
+            </p>
+            <a href="${link}" style="display:inline-block;background:#17130F;color:#FBF9F5;text-decoration:none;padding:14px 28px;font-size:13px;letter-spacing:1px;text-transform:uppercase;">Reset password</a>
+            <p style="font-size:12px;color:#8C8069;margin:24px 0 0;">Or paste this link into your browser:<br/>${link}</p>
+          </div>
+        </div>
+      </div>`,
+    });
+    return true;
+  } catch (e) {
+    console.error("[email] password reset failed", e);
+    return false;
+  }
+}
+
 async function sendCustomerConfirmation(order: FullOrder) {
   if (!resend) {
     console.log("[email] RESEND_API_KEY not set — skipping customer email for", order.orderNumber);
