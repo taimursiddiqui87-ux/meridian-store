@@ -175,7 +175,12 @@ export function mergeConfig(stored: Partial<SiteConfig> | null | undefined): Sit
   };
 }
 
-/** Cached read for the storefront (revalidated via the "site-config" tag on save). */
+/**
+ * Cached read for the storefront (revalidated via the "site-config" tag on save).
+ * NOTE: bump the cache key version whenever the SiteConfig shape gains new keys —
+ * Vercel's data cache persists across deploys, and a stale pre-migration object
+ * would otherwise be served to dynamic routes.
+ */
 export const getSiteConfig = unstable_cache(
   async (): Promise<SiteConfig> => {
     try {
@@ -185,7 +190,7 @@ export const getSiteConfig = unstable_cache(
       return DEFAULT_CONFIG;
     }
   },
-  ["site-config"],
+  ["site-config-v2"],
   { tags: ["site-config"], revalidate: 3600 },
 );
 

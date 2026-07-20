@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { SiteConfig } from "@/lib/settings";
 
 /** Sveston-style red sale strip with a live countdown. Fully CMS-driven. */
-export function SaleBar({ sale }: { sale: SiteConfig["sale"] }) {
+export function SaleBar({ sale }: { sale?: SiteConfig["sale"] }) {
   const [now, setNow] = useState<number | null>(null);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function SaleBar({ sale }: { sale: SiteConfig["sale"] }) {
     return () => clearInterval(id);
   }, []);
 
-  if (!sale.enabled) return null;
+  if (!sale?.enabled) return null;
 
   const target = sale.endsAt ? new Date(sale.endsAt).getTime() : NaN;
   const diff = now !== null && !Number.isNaN(target) ? target - now : NaN;

@@ -36,12 +36,18 @@ export function CurrencyProvider({
   config,
   children,
 }: {
-  config: CurrencyConfig;
+  config?: CurrencyConfig;
   children: ReactNode;
 }) {
-  const enabled = config.enabled.filter((c) => CURRENCIES[c]);
+  // Defensive defaults: a stale cached config (older shape) must never crash the site.
+  const safe: CurrencyConfig = {
+    defaultCode: config?.defaultCode ?? "USD",
+    enabled: config?.enabled?.length ? config.enabled : ["USD"],
+    rates: { USD: 1, ...(config?.rates ?? {}) },
+  };
+  const enabled = safe.enabled.filter((c) => CURRENCIES[c]);
   const [code, setCodeState] = useState(
-    enabled.includes(config.defaultCode) ? config.defaultCode : "USD",
+    enabled.includes(safe.defaultCode) ? safe.defaultCode : "USD",
   );
 
   // Restore the shopper's choice after mount (avoids SSR hydration mismatch).
@@ -68,16 +74,18 @@ export function CurrencyProvider({
     [enabled],
   );
 
+  const rates = safe.rates;
   const format = useCallback(
     (cents: number) => {
-      const rate = config.rates[code] ?? 1;
+      const rate = rates[code] ?? 1;
       const amount = (cents / 100) * rate;
       const { symbol } = CURRENCIES[code] ?? CURRENCIES.USD;
       return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
         Math.round(amount),
       )}`;
     },
-    [code, config.rates],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [code, JSON.stringify(rates)],
   );
 
   const value = useMemo(
