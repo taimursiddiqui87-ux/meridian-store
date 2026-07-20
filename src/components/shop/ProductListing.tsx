@@ -27,12 +27,15 @@ export function ProductListing({
   products,
   initialQuery = "",
   initialSort = "featured",
+  initialCollections = [],
   collectionLabel = "Collection",
   showCategoryFilter = false,
 }: {
   products: Product[];
   initialQuery?: string;
   initialSort?: string;
+  /** Pre-selected collection chips (deep links like /category/watches?c=Men). */
+  initialCollections?: string[];
   collectionLabel?: string;
   showCategoryFilter?: boolean;
 }) {
@@ -44,7 +47,9 @@ export function ProductListing({
 
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [selectedCollections, setSelectedCollections] = useState<string[]>(
+    initialCollections.filter((c) => products.some((p) => p.collection === c)),
+  );
   const [priceBucket, setPriceBucket] = useState("all");
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sort, setSort] = useState(

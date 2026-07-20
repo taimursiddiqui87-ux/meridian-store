@@ -74,10 +74,15 @@ export function Footer({ store }: { store: SiteConfig["store"] }) {
       {/* Links */}
       <div className="container-luxe grid grid-cols-2 gap-10 py-14 md:grid-cols-4 lg:grid-cols-5">
         <div className="col-span-2 lg:col-span-2">
-          <span className="font-serif text-3xl font-semibold tracking-[0.14em]">{store.name}</span>
+          <span className="inline-block bg-gradient-to-b from-[#F0E3BC] via-brass-400 to-brass-700 bg-clip-text font-serif text-3xl font-semibold tracking-[0.18em] text-transparent">
+            {store.name}
+          </span>
+          <p className="mt-1 text-[9px] uppercase tracking-[0.28em] text-paper/50">
+            {store.tagline} · {store.established}
+          </p>
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-paper/60">
-            {store.tagline} Hand-finished pieces and considered essentials, designed in-house and built
-            to be handed down.
+            Hand-finished pieces and considered essentials, designed in-house and built to be handed
+            down.
           </p>
           <div className="mt-6 flex gap-3">
             {socials.map(({ Icon, href }, i) => (

@@ -1,4 +1,5 @@
 import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { CategoryTiles } from "@/components/home/CategoryTiles";
 import { TrustBar } from "@/components/home/TrustBar";
 import { CategoryShowcase } from "@/components/home/CategoryShowcase";
 import { PromoSplit } from "@/components/home/PromoSplit";
@@ -55,6 +56,7 @@ export default async function Home() {
   return (
     <>
       <HeroCarousel banners={banners} />
+      <CategoryTiles />
       <TrustBar />
 
       {/* Categories */}

@@ -25,10 +25,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const [config, watches] = await Promise.all([getSiteConfig(), getProductsByCategory("watches")]);
-  const watchNav = watches.slice(0, 8).map((p) => ({
+  const watchNav = watches.slice(0, 12).map((p) => ({
     name: p.name,
     slug: p.slug,
     image: p.images[0] ?? "",
+    collection: p.collection,
   }));
   return (
     <html lang="en">

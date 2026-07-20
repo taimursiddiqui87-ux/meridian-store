@@ -12,7 +12,9 @@ import { CurrencySelect } from "./CurrencySelect";
 
 type NavItem = { label: string; href: string; mega?: boolean };
 
-export type NavProduct = { name: string; slug: string; image: string };
+export type NavProduct = { name: string; slug: string; image: string; collection: string };
+
+const WATCH_GROUPS = ["Men", "Women", "Sport"] as const;
 
 const nav: NavItem[] = [
   { label: "Watches", href: "/category/watches", mega: true },
@@ -26,13 +28,19 @@ const nav: NavItem[] = [
 export function Header({
   storeName,
   established,
+  tagline,
   watchNav,
 }: {
   storeName: string;
   established: string;
+  tagline: string;
   watchNav: NavProduct[];
 }) {
   const featuredWatch = watchNav[0];
+  const watchGroups = WATCH_GROUPS.map((g) => ({
+    label: g,
+    items: watchNav.filter((p) => p.collection === g),
+  })).filter((g) => g.items.length > 0);
   const { count, openCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
@@ -98,13 +106,14 @@ export function Header({
             </button>
           </div>
 
-          {/* Center — prominent wordmark */}
+          {/* Center — prominent gold wordmark (matches the ZAMIRA logo lockup) */}
           <Link href="/" className="shrink-0 text-center" aria-label={`${storeName} home`}>
-            <span className="block font-serif text-[30px] font-semibold leading-none tracking-[0.2em] text-paper sm:text-[34px] lg:text-[38px]">
+            <span className="block bg-gradient-to-b from-[#F0E3BC] via-brass-400 to-brass-700 bg-clip-text font-serif text-[30px] font-semibold leading-none tracking-[0.2em] text-transparent sm:text-[34px] lg:text-[38px]">
               {storeName}
             </span>
-            <span className="mt-1 block text-[8.5px] uppercase tracking-luxe text-brass-300/90">
-              {established}
+            <span className="mt-1.5 block text-[7px] uppercase tracking-[0.3em] text-paper/70 sm:text-[8px]">
+              {tagline}
+              <span className="hidden text-brass-300/90 lg:inline"> · {established}</span>
             </span>
           </Link>
 
@@ -166,23 +175,34 @@ export function Header({
                 {active && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-brass-400" />}
 
                 {item.mega && (
-                  <div className="invisible absolute left-1/2 top-full z-50 w-[640px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-300 ease-luxe group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
-                    <div className="grid grid-cols-[1.2fr_1fr] gap-6 rounded-b-2xl border border-stone-200 bg-paper p-6 text-ink shadow-lift">
+                  <div className="invisible absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-300 ease-luxe group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
+                    <div className="grid grid-cols-[2fr_1fr] gap-6 rounded-b-2xl border border-stone-200 bg-paper p-6 text-ink shadow-lift">
                       <div>
-                        <p className="label-caps mb-4 text-stone-400">Collections</p>
-                        <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                          {watchNav.map((p) => (
-                            <Link
-                              key={p.slug}
-                              href={`/product/${p.slug}`}
-                              className="group/link flex items-center justify-between text-[13.5px] text-ink-soft transition-colors hover:text-brass-600"
-                            >
-                              {p.name}
-                              <ChevronRight
-                                size={13}
-                                className="opacity-0 transition-opacity group-hover/link:opacity-100"
-                              />
-                            </Link>
+                        <div className="grid grid-cols-3 gap-6">
+                          {watchGroups.map((g) => (
+                            <div key={g.label}>
+                              <Link
+                                href={`/category/watches?c=${g.label}`}
+                                className="label-caps mb-3 block text-brass-600 hover:text-brass-700"
+                              >
+                                {g.label === "Sport" ? "Sport" : `${g.label}'s`} Watches
+                              </Link>
+                              <div className="space-y-2">
+                                {g.items.map((p) => (
+                                  <Link
+                                    key={p.slug}
+                                    href={`/product/${p.slug}`}
+                                    className="group/link flex items-center justify-between text-[13px] text-ink-soft transition-colors hover:text-brass-600"
+                                  >
+                                    {p.name}
+                                    <ChevronRight
+                                      size={12}
+                                      className="opacity-0 transition-opacity group-hover/link:opacity-100"
+                                    />
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
                           ))}
                         </div>
                         <Link

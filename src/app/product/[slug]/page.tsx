@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { products as seedProducts } from "@/lib/data";
 import { getProduct, getRelatedProducts } from "@/lib/products";
+import { getSiteConfig } from "@/lib/settings";
 import { ProductDetail } from "@/components/product/ProductDetail";
+import { ReviewsSummary } from "@/components/product/ReviewsSummary";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
@@ -25,11 +27,22 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const product = await getProduct(params.slug);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product.slug, 4);
+  const [related, config] = await Promise.all([
+    getRelatedProducts(product.slug, 4),
+    getSiteConfig(),
+  ]);
 
   return (
     <>
-      <ProductDetail product={product} />
+      <ProductDetail product={product} sale={config.sale} />
+
+      <ReviewsSummary
+        rating={product.rating}
+        reviewCount={product.reviewCount}
+        storeEmail={config.store.email}
+        productName={product.name}
+      />
+
       <section className="container-luxe py-16 lg:py-24">
         <SectionHeading eyebrow="You May Also Like" title="Complete the collection" />
         <ProductGrid products={related} className="mt-12" />

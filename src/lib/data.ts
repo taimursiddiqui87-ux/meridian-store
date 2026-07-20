@@ -100,7 +100,7 @@ export const products: Product[] = [
     category: "watches",
     price: 129000,
     currency: "USD",
-    collection: "Aera",
+    collection: "Men",
     shortDescription: "Automatic · Midnight-blue dial",
     description:
       "The Aera 39 is our defining silhouette — a sunburst midnight-blue dial framed by a hand-polished 39mm case. Powered by a self-winding movement visible through the exhibition caseback, it wears as easily with linen as it does with a tailored cuff.",
@@ -136,7 +136,7 @@ export const products: Product[] = [
     category: "watches",
     price: 168000,
     currency: "USD",
-    collection: "Noir",
+    collection: "Men",
     shortDescription: "Chronograph · Blacked-out steel",
     description:
       "A stealth chronograph finished in matte black PVD. Three registers, a tachymeter bezel and luminous hands make the Noir as capable as it is understated.",
@@ -166,7 +166,7 @@ export const products: Product[] = [
     category: "watches",
     price: 215000,
     currency: "USD",
-    collection: "Heritage",
+    collection: "Men",
     shortDescription: "Dress · Rose gold",
     description:
       "A tribute to mid-century elegance. The Heritage 1968 pairs a warm champagne dial with a slim rose-gold case and a domed crystal that bends the light just so.",
@@ -196,7 +196,7 @@ export const products: Product[] = [
     category: "watches",
     price: 149000,
     currency: "USD",
-    collection: "Terra",
+    collection: "Sport",
     shortDescription: "GMT · Sage green",
     description:
       "Built for travellers. A true GMT complication tracks a second time zone against a 24-hour bezel, all beneath a scratch-resistant sapphire dome on a rugged sage dial.",
@@ -227,7 +227,7 @@ export const products: Product[] = [
     category: "watches",
     price: 198000,
     currency: "USD",
-    collection: "Luna",
+    collection: "Women",
     shortDescription: "Moonphase · Ivory",
     description:
       "A poetic complication. The Luna traces the lunar cycle across an ivory dial with a hand-finished mother-of-pearl moon disc — quietly mechanical, endlessly watchable.",
@@ -256,7 +256,7 @@ export const products: Product[] = [
     category: "watches",
     price: 92000,
     currency: "USD",
-    collection: "Field",
+    collection: "Sport",
     shortDescription: "Field · Khaki",
     description:
       "Utilitarian by design. A high-legibility khaki dial, sword hands and a sailcloth strap make the Field Officer the honest everyday companion — tough, light and quietly handsome.",
@@ -285,7 +285,7 @@ export const products: Product[] = [
     category: "watches",
     price: 115000,
     currency: "USD",
-    collection: "Onyx",
+    collection: "Men",
     shortDescription: "Minimalist · All black",
     description:
       "Reduction as luxury. The Onyx Slim strips the dial to two hands and a whisper of an index, cased in 6.8mm of blackened steel. Nothing to add, nothing to take away.",
@@ -315,7 +315,7 @@ export const products: Product[] = [
     price: 176000,
     compareAtPrice: 198000,
     currency: "USD",
-    collection: "Aurora",
+    collection: "Women",
     shortDescription: "Two-tone · Steel & gold",
     description:
       "The Aurora balances brushed steel against warm gold accents for a look that reads dressy or relaxed. A fluted bezel catches the light with every turn of the wrist.",
@@ -907,7 +907,7 @@ export const relatedProducts = (slug: string, limit = 4) => {
 
 /** Label used for the collection filter on each category's listing page. */
 export const collectionLabels: Record<string, string> = {
-  watches: "Collection",
+  watches: "Shop For",
   perfumes: "Scent Family",
   jewelry: "Type",
 };

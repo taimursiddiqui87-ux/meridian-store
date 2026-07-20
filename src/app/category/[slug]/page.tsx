@@ -28,7 +28,13 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 
 export const revalidate = 300;
 
-export default async function CategoryPage({ params }: { params: { slug: string } }) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams: { c?: string };
+}) {
   const category = getCategory(params.slug);
   if (!category) notFound();
 
@@ -37,6 +43,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
 
   const items = await getProductsByCategory(category.slug);
   const editorial = categoryEditorial[category.slug];
+  const initialCollections = searchParams.c ? [searchParams.c] : [];
 
   return (
     <>
@@ -45,6 +52,7 @@ export default async function CategoryPage({ params }: { params: { slug: string 
       <div className="container-luxe py-10">
         <ProductListing
           products={items}
+          initialCollections={initialCollections}
           collectionLabel={collectionLabels[category.slug] ?? "Collection"}
         />
       </div>

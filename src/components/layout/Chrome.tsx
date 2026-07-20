@@ -26,14 +26,20 @@ export function Chrome({
   sale: SiteConfig["sale"];
 }) {
   const pathname = usePathname();
-  if (pathname?.startsWith("/admin")) {
+  // Admin has its own shell; checkout is a focused, chrome-less funnel.
+  if (pathname?.startsWith("/admin") || pathname === "/checkout") {
     return <>{children}</>;
   }
   return (
     <>
       <SaleBar sale={sale} />
       <AnnouncementBar messages={announcements} />
-      <Header storeName={store.name} established={store.established} watchNav={watchNav} />
+      <Header
+        storeName={store.name}
+        established={store.established}
+        tagline={store.tagline}
+        watchNav={watchNav}
+      />
       <main>{children}</main>
       <Footer store={store} />
       <CartDrawer />

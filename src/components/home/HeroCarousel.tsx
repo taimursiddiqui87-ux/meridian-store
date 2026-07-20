@@ -23,7 +23,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
   return (
     <section
-      className="relative h-[calc(100vh-110px)] min-h-[560px] w-full overflow-hidden bg-ink"
+      className="relative h-[64vh] min-h-[500px] w-full overflow-hidden bg-ink lg:h-[70vh]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
