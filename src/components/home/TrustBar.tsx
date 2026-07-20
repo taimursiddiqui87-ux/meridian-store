@@ -1,31 +1,47 @@
-import { Truck, ShieldCheck, RefreshCw, PenLine } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Banknote, Plane, ShieldCheck, RefreshCw } from "lucide-react";
 
+/** Localized value badges — colorful circles, Sveston-style. */
 const items = [
-  { icon: Truck, title: "Free Worldwide Shipping", desc: "Complimentary on orders over $150" },
-  { icon: ShieldCheck, title: "2-Year Warranty", desc: "International movement coverage" },
-  { icon: RefreshCw, title: "30-Day Returns", desc: "Changed your mind? No problem" },
-  { icon: PenLine, title: "Complimentary Engraving", desc: "Personalise any caseback" },
+  {
+    icon: Banknote,
+    title: "Cash on Delivery",
+    desc: "Available across Pakistan",
+    circle: "bg-amber-100 text-amber-700 ring-amber-200",
+  },
+  {
+    icon: Plane,
+    title: "Express Global Shipping",
+    desc: "UK · USA · CA · worldwide",
+    circle: "bg-sky-100 text-sky-700 ring-sky-200",
+  },
+  {
+    icon: ShieldCheck,
+    title: "2-Year Warranty",
+    desc: "International coverage",
+    circle: "bg-emerald-100 text-emerald-700 ring-emerald-200",
+  },
+  {
+    icon: RefreshCw,
+    title: "30-Day Returns",
+    desc: "Hassle-free exchanges",
+    circle: "bg-rose-100 text-rose-700 ring-rose-200",
+  },
 ];
 
 export function TrustBar() {
   return (
-    <section className="border-y border-stone-200 bg-cream/50">
-      <div className="container-luxe grid grid-cols-2 divide-stone-200 lg:grid-cols-4 lg:divide-x">
-        {items.map((item, i) => (
-          <div
-            key={item.title}
-            className={cn(
-              "flex items-center gap-4 px-2 py-7 lg:px-8",
-              i < 2 && "border-b border-stone-200 lg:border-b-0",
-            )}
-          >
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brass-100 text-brass-700">
-              <item.icon size={19} strokeWidth={1.6} />
+    <section className="border-b border-stone-200 bg-white">
+      <div className="container-luxe grid grid-cols-2 gap-x-4 gap-y-8 py-9 lg:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.title} className="flex flex-col items-center gap-3 text-center">
+            <span
+              className={`grid h-14 w-14 shrink-0 place-items-center rounded-full ring-1 ${item.circle}`}
+            >
+              <item.icon size={22} strokeWidth={1.6} />
             </span>
             <div>
               <p className="text-[13px] font-semibold leading-tight text-ink">{item.title}</p>
-              <p className="mt-0.5 text-[12px] text-ink-muted">{item.desc}</p>
+              <p className="mt-1 text-[12px] text-ink-muted">{item.desc}</p>
             </div>
           </div>
         ))}

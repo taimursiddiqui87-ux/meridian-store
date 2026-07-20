@@ -5,13 +5,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { X, Minus, Plus, ShoppingBag, ArrowRight, Lock, Truck, Tag, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useAppliedCoupon } from "@/hooks/useAppliedCoupon";
 import { computeTotals, type CheckoutRules } from "@/lib/pricing";
-import { formatPrice } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export function CartView({ rules }: { rules: CheckoutRules }) {
   const { lines, remove, setQty, subtotal, count } = useCart();
+  const { format } = useCurrency();
   const { applied, error, validating, apply, remove: removeCoupon } = useAppliedCoupon(subtotal);
   const [code, setCode] = useState("");
   const [applying, setApplying] = useState(false);
@@ -73,7 +74,7 @@ export function CartView({ rules }: { rules: CheckoutRules }) {
                     {line.name}
                   </Link>
                   <p className="mt-1 text-[13px] text-stone-400">{line.variant}</p>
-                  <p className="mt-1 text-sm tabular-nums text-ink-soft">{formatPrice(line.price)}</p>
+                  <p className="mt-1 text-sm tabular-nums text-ink-soft">{format(line.price)}</p>
                   <button
                     onClick={() => remove(line.productId, line.variant)}
                     className="mt-2 flex items-center gap-1 text-[12px] text-stone-400 hover:text-danger md:hidden"
@@ -101,7 +102,7 @@ export function CartView({ rules }: { rules: CheckoutRules }) {
                   </div>
                 </div>
                 <div className="hidden items-center gap-4 md:flex md:w-24 md:justify-end">
-                  <span className="text-sm tabular-nums">{formatPrice(line.price * line.quantity)}</span>
+                  <span className="text-sm tabular-nums">{format(line.price * line.quantity)}</span>
                 </div>
                 <button
                   onClick={() => remove(line.productId, line.variant)}
@@ -165,31 +166,31 @@ export function CartView({ rules }: { rules: CheckoutRules }) {
             <dl className="mt-6 space-y-3 border-t border-stone-200 pt-6 text-sm">
               <div className="flex justify-between">
                 <dt className="text-ink-muted">Subtotal</dt>
-                <dd className="tabular-nums">{formatPrice(totals.subtotal)}</dd>
+                <dd className="tabular-nums">{format(totals.subtotal)}</dd>
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-success">
                   <dt>Discount</dt>
-                  <dd className="tabular-nums">−{formatPrice(totals.discount)}</dd>
+                  <dd className="tabular-nums">−{format(totals.discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
                 <dt className="text-ink-muted">Shipping</dt>
                 <dd className={totals.shipping === 0 ? "text-success" : "tabular-nums"}>
-                  {totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}
+                  {totals.shipping === 0 ? "Free" : format(totals.shipping)}
                 </dd>
               </div>
               {totals.tax > 0 && (
                 <div className="flex justify-between">
                   <dt className="text-ink-muted">Tax</dt>
-                  <dd className="tabular-nums">{formatPrice(totals.tax)}</dd>
+                  <dd className="tabular-nums">{format(totals.tax)}</dd>
                 </div>
               )}
             </dl>
 
             <div className="mt-6 flex items-baseline justify-between border-t border-stone-200 pt-6">
               <span className="text-[13px] uppercase tracking-wider2">Total</span>
-              <span className="font-serif text-3xl tabular-nums">{formatPrice(totals.total)}</span>
+              <span className="font-serif text-3xl tabular-nums">{format(totals.total)}</span>
             </div>
 
             <Link href="/checkout" className="btn-primary mt-6 w-full">
@@ -202,7 +203,7 @@ export function CartView({ rules }: { rules: CheckoutRules }) {
             <div className="mt-4 flex items-center gap-2 border-t border-stone-200 pt-4 text-[12px] text-ink-muted">
               <Truck size={15} className="text-brass-600" />
               {rules.freeShippingThreshold > 0 && subtotal < rules.freeShippingThreshold
-                ? `Free shipping on orders over ${formatPrice(rules.freeShippingThreshold)}`
+                ? `Free shipping on orders over ${format(rules.freeShippingThreshold)}`
                 : "Free insured delivery · Arrives in 2–4 days"}
             </div>
           </div>

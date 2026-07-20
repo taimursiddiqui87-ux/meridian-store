@@ -6,9 +6,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Banknote, CreditCard, ShieldCheck, Truck, AlertCircle, Tag, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { useAppliedCoupon } from "@/hooks/useAppliedCoupon";
 import { computeTotals, type CheckoutRules } from "@/lib/pricing";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { placeOrder } from "@/app/actions/checkout";
 
 const methods = [
@@ -25,6 +26,7 @@ const brandMark: Record<string, { bg: string; text: string; label: string }> = {
 
 export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; storeName: string }) {
   const { lines, subtotal, count } = useCart();
+  const { format, code: currencyCode } = useCurrency();
   const { applied, error: couponError, apply, remove: removeCoupon } = useAppliedCoupon(subtotal);
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -226,7 +228,7 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
             </section>
 
             <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? "Placing your order…" : `Place order · ${formatPrice(totals.total)}`}
+              {loading ? "Placing your order…" : `Place order · ${format(totals.total)}`}
             </button>
             <Link
               href="/cart"
@@ -254,7 +256,7 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
                     <p className="truncate font-serif text-base">{line.name}</p>
                     <p className="text-[12px] text-stone-400">{line.variant}</p>
                   </div>
-                  <span className="text-sm tabular-nums">{formatPrice(line.price * line.quantity)}</span>
+                  <span className="text-sm tabular-nums">{format(line.price * line.quantity)}</span>
                 </li>
               ))}
             </ul>
@@ -303,31 +305,36 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
             <dl className="mt-6 space-y-2.5 border-t border-stone-200 pt-6 text-sm">
               <div className="flex justify-between">
                 <dt className="text-ink-muted">Subtotal</dt>
-                <dd className="tabular-nums">{formatPrice(totals.subtotal)}</dd>
+                <dd className="tabular-nums">{format(totals.subtotal)}</dd>
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-success">
                   <dt>Discount</dt>
-                  <dd className="tabular-nums">−{formatPrice(totals.discount)}</dd>
+                  <dd className="tabular-nums">−{format(totals.discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between">
                 <dt className="text-ink-muted">Shipping</dt>
                 <dd className={totals.shipping === 0 ? "text-success" : "tabular-nums"}>
-                  {totals.shipping === 0 ? "Free" : formatPrice(totals.shipping)}
+                  {totals.shipping === 0 ? "Free" : format(totals.shipping)}
                 </dd>
               </div>
               {totals.tax > 0 && (
                 <div className="flex justify-between">
                   <dt className="text-ink-muted">Tax</dt>
-                  <dd className="tabular-nums">{formatPrice(totals.tax)}</dd>
+                  <dd className="tabular-nums">{format(totals.tax)}</dd>
                 </div>
               )}
             </dl>
             <div className="mt-4 flex items-baseline justify-between border-t border-stone-200 pt-4">
               <span className="text-[13px] uppercase tracking-wider2">Total</span>
-              <span className="font-serif text-3xl tabular-nums">{formatPrice(totals.total)}</span>
+              <span className="font-serif text-3xl tabular-nums">{format(totals.total)}</span>
             </div>
+            {currencyCode !== "USD" && (
+              <p className="mt-2 text-[11px] text-stone-400">
+                Shown in {currencyCode} at today&apos;s rate — orders are processed in USD.
+              </p>
+            )}
 
             <div className="mt-6 space-y-2 border-t border-stone-200 pt-5 text-[12px] text-ink-muted">
               <p className="flex items-center gap-2"><ShieldCheck size={14} className="text-brass-600" /> Secure checkout · 2-year warranty</p>

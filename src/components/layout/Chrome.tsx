@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { AnnouncementBar } from "./AnnouncementBar";
+import { SaleBar } from "./SaleBar";
 import { Header, type NavProduct } from "./Header";
 import { Footer } from "./Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
@@ -16,11 +17,13 @@ export function Chrome({
   store,
   announcements,
   watchNav,
+  sale,
 }: {
   children: React.ReactNode;
   store: SiteConfig["store"];
   announcements: string[];
   watchNav: NavProduct[];
+  sale: SiteConfig["sale"];
 }) {
   const pathname = usePathname();
   if (pathname?.startsWith("/admin")) {
@@ -28,6 +31,7 @@ export function Chrome({
   }
   return (
     <>
+      <SaleBar sale={sale} />
       <AnnouncementBar messages={announcements} />
       <Header storeName={store.name} established={store.established} watchNav={watchNav} />
       <main>{children}</main>

@@ -16,13 +16,15 @@ import {
 } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { getCategory } from "@/lib/data";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { Stars } from "@/components/ui/Stars";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export function ProductDetail({ product }: { product: Product }) {
   const { add, openCart } = useCart();
+  const { format } = useCurrency();
   const [activeImage, setActiveImage] = useState(0);
   const [variant, setVariant] = useState(product.variants[0]);
   const [qty, setQty] = useState(1);
@@ -117,16 +119,18 @@ export function ProductDetail({ product }: { product: Product }) {
             </span>
           </div>
 
-          <div className="mt-5 flex items-baseline gap-3">
-            <span className="font-serif text-3xl tabular-nums">{formatPrice(product.price)}</span>
+          <div className="mt-5 flex flex-wrap items-baseline gap-3">
+            <span className={cn("font-serif text-3xl tabular-nums", onSale && "text-danger")}>
+              {format(product.price)}
+            </span>
             {onSale && (
               <span className="text-lg text-stone-400 line-through">
-                {formatPrice(product.compareAtPrice!)}
+                {format(product.compareAtPrice!)}
               </span>
             )}
             {onSale && (
-              <span className="bg-danger/10 px-2 py-1 text-[11px] font-medium uppercase tracking-wider text-danger">
-                Save {formatPrice(product.compareAtPrice! - product.price)}
+              <span className="rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-500 px-2.5 py-1 text-[11px] font-bold text-white">
+                {Math.round((1 - product.price / product.compareAtPrice!) * 100)}% OFF
               </span>
             )}
           </div>
@@ -185,13 +189,16 @@ export function ProductDetail({ product }: { product: Product }) {
             <button
               onClick={() => handleAdd(false)}
               disabled={outOfStock}
-              className={cn("btn-primary h-14 flex-1", outOfStock && "cursor-not-allowed opacity-50")}
+              className={cn(
+                "btn-primary h-14 flex-1 rounded-full",
+                outOfStock && "cursor-not-allowed opacity-50",
+              )}
             >
-              {outOfStock ? "Out of stock" : `Add to Cart — ${formatPrice(product.price * qty)}`}
+              {outOfStock ? "Out of stock" : `Add to Cart — ${format(product.price * qty)}`}
             </button>
           </div>
           {!outOfStock && (
-            <button onClick={() => handleAdd(true)} className="btn-gold mt-3 h-14 w-full">
+            <button onClick={() => handleAdd(true)} className="btn-gold mt-3 h-14 w-full rounded-full">
               Buy it now
             </button>
           )}

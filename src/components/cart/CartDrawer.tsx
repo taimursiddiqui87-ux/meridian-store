@@ -4,12 +4,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, Plus, Minus, ShoppingBag, ArrowRight, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { cn, formatPrice } from "@/lib/utils";
+import { useCurrency } from "@/context/CurrencyContext";
+import { cn } from "@/lib/utils";
 
 const FREE_SHIP_THRESHOLD = 15000; // cents
 
 export function CartDrawer() {
   const { lines, isOpen, closeCart, remove, setQty, subtotal, count } = useCart();
+  const { format } = useCurrency();
   const remaining = Math.max(0, FREE_SHIP_THRESHOLD - subtotal);
   const progress = Math.min(100, (subtotal / FREE_SHIP_THRESHOLD) * 100);
 
@@ -47,7 +49,7 @@ export function CartDrawer() {
               <Truck size={15} className="text-brass-600" />
               {remaining > 0 ? (
                 <span>
-                  You’re <strong className="font-semibold">{formatPrice(remaining)}</strong> away from free
+                  You’re <strong className="font-semibold">{format(remaining)}</strong> away from free
                   shipping
                 </span>
               ) : (
@@ -127,7 +129,7 @@ export function CartDrawer() {
                           <Plus size={13} />
                         </button>
                       </div>
-                      <span className="text-sm tabular-nums">{formatPrice(line.price * line.quantity)}</span>
+                      <span className="text-sm tabular-nums">{format(line.price * line.quantity)}</span>
                     </div>
                   </div>
                 </li>
@@ -141,7 +143,7 @@ export function CartDrawer() {
           <div className="border-t border-stone-200 px-6 py-5">
             <div className="flex items-center justify-between">
               <span className="text-[13px] uppercase tracking-wider2 text-ink-muted">Subtotal</span>
-              <span className="font-serif text-2xl tabular-nums">{formatPrice(subtotal)}</span>
+              <span className="font-serif text-2xl tabular-nums">{format(subtotal)}</span>
             </div>
             <p className="mt-1 text-[12px] text-stone-400">Shipping &amp; taxes calculated at checkout.</p>
             <Link href="/checkout" onClick={closeCart} className="btn-primary mt-4 w-full">

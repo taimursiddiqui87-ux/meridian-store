@@ -62,7 +62,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
           >
             <Link href={active.primaryCta.href} className="block" aria-label={active.title}>
               {active.badge && (
-                <span className="mb-4 inline-block animate-fade-up bg-brass-500 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider2 text-ink">
+                <span className="mb-4 inline-block animate-fade-up rounded-full bg-gradient-to-r from-[#E11D2E] to-[#8F0E13] px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider2 text-white shadow-soft">
                   {active.badge}
                 </span>
               )}
@@ -80,11 +80,11 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
                 active.align === "center" && "justify-center",
               )}
             >
-              <Link href={active.primaryCta.href} className="btn-light">
+              <Link href={active.primaryCta.href} className="btn-gold rounded-full">
                 {active.primaryCta.label}
               </Link>
               {active.secondaryCta && (
-                <Link href={active.secondaryCta.href} className="btn-outline-light">
+                <Link href={active.secondaryCta.href} className="btn-outline-light rounded-full">
                   {active.secondaryCta.label}
                 </Link>
               )}

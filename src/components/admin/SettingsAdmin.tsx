@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Store, LayoutGrid, FileText, Megaphone, Truck, Check, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Store, LayoutGrid, FileText, Megaphone, Truck, BadgePercent, Check, Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageHeader, Card, CardHead } from "@/components/admin/AdminUI";
 import type { SiteConfig, HomeSection } from "@/lib/settings";
@@ -13,6 +13,8 @@ import {
   saveAbout,
   saveAnnouncements,
   saveCheckout,
+  saveSale,
+  saveCurrency,
 } from "@/app/actions/settings";
 
 type CatalogItem = { slug: string; name: string; category: string; image: string };
@@ -21,6 +23,7 @@ const tabs = [
   { id: "store", label: "Store profile", icon: Store },
   { id: "home", label: "Homepage", icon: LayoutGrid },
   { id: "about", label: "About page", icon: FileText },
+  { id: "sale", label: "Sale & Currency", icon: BadgePercent },
   { id: "checkout", label: "Checkout", icon: Truck },
   { id: "announce", label: "Announcements", icon: Megaphone },
 ] as const;
@@ -244,6 +247,105 @@ export function SettingsAdmin({
             </Card>
           )}
 
+          {/* SALE BANNER + CURRENCY */}
+          {tab === "sale" && (
+            <>
+              <Card>
+                <CardHead
+                  title="Sale countdown banner"
+                  action={
+                    <button
+                      onClick={() => setSale("enabled", !cfg.sale.enabled)}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium",
+                        cfg.sale.enabled ? "bg-success/10 text-success" : "bg-stone-100 text-stone-500",
+                      )}
+                    >
+                      {cfg.sale.enabled ? <Eye size={13} /> : <EyeOff size={13} />}
+                      {cfg.sale.enabled ? "Shown" : "Hidden"}
+                    </button>
+                  }
+                />
+                <div className="space-y-4 p-5">
+                  <p className="text-[13px] text-ink-muted">
+                    The red strip at the very top of the store, with a live countdown — perfect for a
+                    launch or seasonal sale.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Headline (e.g. Launch Sale)">
+                      <input className="field-input" value={cfg.sale.headline} onChange={(e) => setSale("headline", e.target.value)} />
+                    </Field>
+                    <Field label="Discount pill (e.g. UP TO 40% OFF)">
+                      <input className="field-input" value={cfg.sale.discountLabel} onChange={(e) => setSale("discountLabel", e.target.value)} />
+                    </Field>
+                    <Field label="Message (larger screens)">
+                      <input className="field-input" value={cfg.sale.message} onChange={(e) => setSale("message", e.target.value)} />
+                    </Field>
+                    <Field label="Links to">
+                      <input className="field-input" value={cfg.sale.href} onChange={(e) => setSale("href", e.target.value)} />
+                    </Field>
+                    <Field label="Countdown ends (blank = no timer)">
+                      <input
+                        type="datetime-local"
+                        className="field-input"
+                        value={cfg.sale.endsAt.slice(0, 16)}
+                        onChange={(e) => setSale("endsAt", e.target.value)}
+                      />
+                    </Field>
+                  </div>
+                </div>
+                <div className="flex justify-end border-t border-stone-100 px-5 py-4">
+                  <SaveButton label="sale" onClick={() => run("sale", () => saveSale(cfg.sale))} />
+                </div>
+              </Card>
+
+              <Card>
+                <CardHead title="Currencies" />
+                <div className="space-y-4 p-5">
+                  <p className="text-[13px] text-ink-muted">
+                    Shoppers can switch display currency from the header. Prices are stored in USD and
+                    converted with the rates below.
+                  </p>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Default currency">
+                      <select
+                        className="field-input"
+                        value={cfg.currency.defaultCode}
+                        onChange={(e) => setCurrencyCfg({ defaultCode: e.target.value })}
+                      >
+                        {["USD", "PKR", "GBP", "CAD"].map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <div />
+                    {(["PKR", "GBP", "CAD"] as const).map((c) => (
+                      <Field key={c} label={`1 USD = ? ${c}`}>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          className="field-input"
+                          value={cfg.currency.rates[c] ?? ""}
+                          onChange={(e) =>
+                            setCurrencyCfg({
+                              rates: { ...cfg.currency.rates, [c]: Number(e.target.value) },
+                            })
+                          }
+                        />
+                      </Field>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex justify-end border-t border-stone-100 px-5 py-4">
+                  <SaveButton label="currency" onClick={() => run("currency", () => saveCurrency(cfg.currency))} />
+                </div>
+              </Card>
+            </>
+          )}
+
           {/* CHECKOUT */}
           {tab === "checkout" && (
             <Card>
@@ -348,6 +450,14 @@ export function SettingsAdmin({
   }
   function setCheckout<K extends keyof SiteConfig["checkout"]>(k: K, v: SiteConfig["checkout"][K]) {
     setCfg({ ...cfg, checkout: { ...cfg.checkout, [k]: v } });
+    setSaved(null);
+  }
+  function setSale<K extends keyof SiteConfig["sale"]>(k: K, v: SiteConfig["sale"][K]) {
+    setCfg({ ...cfg, sale: { ...cfg.sale, [k]: v } });
+    setSaved(null);
+  }
+  function setCurrencyCfg(patch: Partial<SiteConfig["currency"]>) {
+    setCfg({ ...cfg, currency: { ...cfg.currency, ...patch } });
     setSaved(null);
   }
   function setValue(i: number, k: "title" | "body", v: string) {

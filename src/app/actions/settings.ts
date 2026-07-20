@@ -45,6 +45,39 @@ export async function saveAbout(about: SiteConfig["about"]) {
   await persist({ about });
 }
 
+export async function saveSale(sale: SiteConfig["sale"]) {
+  await guard();
+  await persist({
+    sale: {
+      enabled: !!sale.enabled,
+      headline: sale.headline?.trim() || "Sale",
+      message: sale.message?.trim() || "",
+      discountLabel: sale.discountLabel?.trim() || "",
+      endsAt: sale.endsAt?.trim() || "",
+      href: sale.href?.trim() || "/shop",
+    },
+  });
+}
+
+const CURRENCY_CODES = ["USD", "PKR", "GBP", "CAD"];
+
+export async function saveCurrency(currency: SiteConfig["currency"]) {
+  await guard();
+  const rates: Record<string, number> = { USD: 1 };
+  for (const code of CURRENCY_CODES) {
+    if (code === "USD") continue;
+    const r = Number(currency.rates?.[code]);
+    rates[code] = r > 0 ? r : 1;
+  }
+  await persist({
+    currency: {
+      defaultCode: CURRENCY_CODES.includes(currency.defaultCode) ? currency.defaultCode : "USD",
+      enabled: CURRENCY_CODES,
+      rates,
+    },
+  });
+}
+
 export async function saveCheckout(checkout: SiteConfig["checkout"]) {
   await guard();
   await persist({

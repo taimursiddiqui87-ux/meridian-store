@@ -43,6 +43,19 @@ export interface SiteConfig {
     shippingFlat: number; // integer cents charged when the order is below the threshold
     taxRatePct: number; // percentage applied to the discounted subtotal
   };
+  sale: {
+    enabled: boolean;
+    headline: string; // e.g. "SALE"
+    message: string; // shown on larger screens
+    discountLabel: string; // the white pill, e.g. "UP TO 40% OFF"
+    endsAt: string; // local datetime (YYYY-MM-DDTHH:mm); empty = no countdown
+    href: string; // where the bar links to
+  };
+  currency: {
+    defaultCode: string; // display currency before the shopper picks one
+    enabled: string[]; // subset of USD | PKR | GBP | CAD
+    rates: Record<string, number>; // units per 1 USD (USD is always 1)
+  };
 }
 
 export const DEFAULT_CONFIG: SiteConfig = {
@@ -116,6 +129,19 @@ export const DEFAULT_CONFIG: SiteConfig = {
     shippingFlat: 1500, // $15 flat otherwise
     taxRatePct: 0, // no tax by default
   },
+  sale: {
+    enabled: true,
+    headline: "Launch Sale",
+    message: "Launch week is live — across all three collections",
+    discountLabel: "UP TO 40% OFF",
+    endsAt: "2026-07-31T23:59",
+    href: "/shop",
+  },
+  currency: {
+    defaultCode: "USD",
+    enabled: ["USD", "PKR", "GBP", "CAD"],
+    rates: { USD: 1, PKR: 278, GBP: 0.79, CAD: 1.37 },
+  },
 };
 
 /** Deep-merge stored config over the defaults so new fields always resolve. */
@@ -139,6 +165,13 @@ export function mergeConfig(stored: Partial<SiteConfig> | null | undefined): Sit
       stats: s.about?.stats?.length ? s.about.stats : DEFAULT_CONFIG.about.stats,
     },
     checkout: { ...DEFAULT_CONFIG.checkout, ...(s.checkout ?? {}) },
+    sale: { ...DEFAULT_CONFIG.sale, ...(s.sale ?? {}) },
+    currency: {
+      ...DEFAULT_CONFIG.currency,
+      ...(s.currency ?? {}),
+      enabled: s.currency?.enabled?.length ? s.currency.enabled : DEFAULT_CONFIG.currency.enabled,
+      rates: { ...DEFAULT_CONFIG.currency.rates, ...(s.currency?.rates ?? {}) },
+    },
   };
 }
 

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ function CategoryCard({ category, big }: { category: Category; big?: boolean }) 
     <Link
       href={href}
       className={cn(
-        "group relative block overflow-hidden bg-ink",
+        "group relative block overflow-hidden rounded-xl2 bg-ink",
         big ? "h-[440px] md:h-full" : "h-[300px] md:h-full",
       )}
     >
@@ -26,7 +26,7 @@ function CategoryCard({ category, big }: { category: Category; big?: boolean }) 
           !live && "opacity-90",
         )}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/15 to-transparent" />
 
       {!live && (
         <span className="absolute left-5 top-5 rounded-full bg-paper/95 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider2 text-ink">
@@ -34,7 +34,8 @@ function CategoryCard({ category, big }: { category: Category; big?: boolean }) 
         </span>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-6 lg:p-8">
+      {/* Copy */}
+      <div className="absolute inset-x-0 bottom-12 p-6 lg:p-8">
         <p className="text-[11px] uppercase tracking-wider2 text-brass-300">{category.tagline}</p>
         <h3
           className={cn(
@@ -47,22 +48,18 @@ function CategoryCard({ category, big }: { category: Category; big?: boolean }) 
         {big && (
           <p className="mt-3 max-w-md text-sm leading-relaxed text-paper/75">{category.description}</p>
         )}
-        <span className="mt-5 inline-flex items-center gap-2 text-[12px] font-medium uppercase tracking-wider2 text-paper">
-          {live ? (
-            <>
-              Shop the collection
-              <ArrowUpRight
-                size={16}
-                className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </>
-          ) : (
-            <>
-              <Bell size={14} /> Notify me at launch
-            </>
-          )}
-        </span>
       </div>
+
+      {/* Sveston-style shop bar */}
+      <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-ink/95 py-3.5 text-[11px] font-bold uppercase tracking-luxe text-paper transition-colors duration-300 group-hover:bg-brass-500 group-hover:text-ink">
+        {live ? (
+          `Shop ${category.name}`
+        ) : (
+          <>
+            <Bell size={13} /> Notify me at launch
+          </>
+        )}
+      </span>
     </Link>
   );
 }

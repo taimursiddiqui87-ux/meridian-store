@@ -6,6 +6,7 @@ import { BrandStory } from "@/components/home/BrandStory";
 import { Testimonials } from "@/components/home/Testimonials";
 import { InstagramGrid } from "@/components/home/InstagramGrid";
 import { HomeProductSection } from "@/components/home/HomeProductSection";
+import { FeaturedTabs, type FeaturedTab } from "@/components/home/FeaturedTabs";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
 import { categories, promoBanners, testimonials } from "@/lib/data";
@@ -24,18 +25,46 @@ export default async function Home() {
   const resolve = (slugs: string[]): Product[] =>
     slugs.map((s) => bySlug.get(s)).filter((p): p is Product => Boolean(p));
 
+  const featuredTabs: FeaturedTab[] = [
+    {
+      key: "watches",
+      label: "Watches",
+      href: "/category/watches",
+      products: catalog.filter((p) => p.category === "watches"),
+    },
+    {
+      key: "perfumes",
+      label: "Perfumes",
+      href: "/category/perfumes",
+      products: catalog.filter((p) => p.category === "perfumes"),
+    },
+    {
+      key: "jewelry",
+      label: "Jewelry",
+      href: "/category/jewelry",
+      products: catalog.filter((p) => p.category === "jewelry"),
+    },
+    {
+      key: "bestsellers",
+      label: "Bestsellers",
+      href: "/shop",
+      products: catalog.filter((p) => p.isBestseller || p.badge === "Bestseller"),
+    },
+  ];
+
   return (
     <>
       <HeroCarousel banners={banners} />
       <TrustBar />
 
       {/* Categories */}
-      <section className="container-luxe py-20 lg:py-24">
+      <section className="container-luxe py-16 lg:py-20">
         <Reveal>
           <SectionHeading
             eyebrow="The Collections"
             title="Three houses, one standard"
             subtitle="Watches, perfumes and jewelry — three collections held to one obsessive standard of finish."
+            align="center"
           />
         </Reveal>
         <Reveal className="mt-12" delay={80}>
@@ -43,7 +72,14 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      <HomeProductSection section={home.featured} products={resolve(home.featured.productSlugs)} />
+      {/* Featured products with category tabs */}
+      <FeaturedTabs tabs={featuredTabs} />
+
+      <HomeProductSection
+        section={home.featured}
+        products={resolve(home.featured.productSlugs)}
+        className="pt-16"
+      />
 
       <section className="container-luxe py-16 lg:py-20">
         <Reveal>

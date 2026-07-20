@@ -4,12 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Search, User, ShoppingBag, Menu, X, ChevronRight, LogOut } from "lucide-react";
+import { Search, User, ShoppingBag, Menu, X, ChevronRight, LogOut, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
 import { logoutAction } from "@/app/actions/auth";
+import { CurrencySelect } from "./CurrencySelect";
 
-type NavItem = { label: string; href: string; mega?: boolean; soon?: boolean };
+type NavItem = { label: string; href: string; mega?: boolean };
 
 export type NavProduct = { name: string; slug: string; image: string };
 
@@ -17,7 +18,9 @@ const nav: NavItem[] = [
   { label: "Watches", href: "/category/watches", mega: true },
   { label: "Perfumes", href: "/category/perfumes" },
   { label: "Jewelry", href: "/category/jewelry" },
+  { label: "Shop All", href: "/shop" },
   { label: "Our Story", href: "/about" },
+  { label: "Track Order", href: "/account/orders" },
 ];
 
 export function Header({
@@ -33,18 +36,10 @@ export function Header({
   const { count, openCart } = useCart();
   const pathname = usePathname();
   const router = useRouter();
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [user, setUser] = useState<{ name?: string | null; email?: string } | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -78,135 +73,71 @@ export function Header({
   };
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 bg-paper/90 backdrop-blur-md transition-shadow duration-300",
-        scrolled ? "shadow-soft" : "border-b border-stone-200/70",
-      )}
-    >
+    <header className="sticky top-0 z-40 bg-ink text-paper shadow-soft">
+      {/* Main bar — search / big centered wordmark / currency + account + cart */}
       <div className="container-luxe">
-        <div className="flex h-[68px] items-center justify-between gap-4">
-          {/* Left — desktop nav / mobile menu button */}
+        <div className="relative flex h-[74px] items-center justify-between gap-3 lg:h-[86px]">
+          {/* Left */}
           <div className="flex flex-1 items-center gap-1">
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="-ml-2 grid h-10 w-10 place-items-center text-ink lg:hidden"
+              className="-ml-2 grid h-11 w-11 place-items-center text-paper lg:hidden"
             >
               <Menu size={22} strokeWidth={1.5} />
             </button>
-
-            <nav className="hidden items-center gap-7 lg:flex">
-              {nav.map((item) => (
-                <div key={item.label} className="group/nav relative">
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-1.5 py-6 text-[12.5px] font-medium uppercase tracking-wider2 text-ink transition-colors hover:text-brass-600"
-                  >
-                    {item.label}
-                    {item.soon && (
-                      <span className="rounded-full bg-brass-100 px-1.5 py-0.5 text-[8px] tracking-wide text-brass-700">
-                        SOON
-                      </span>
-                    )}
-                  </Link>
-
-                  {item.mega && (
-                    <div className="invisible absolute left-0 top-full z-50 w-[640px] translate-y-2 opacity-0 transition-all duration-300 ease-luxe group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
-                      <div className="grid grid-cols-[1.2fr_1fr] gap-6 border border-stone-200 bg-paper p-6 shadow-lift">
-                        <div>
-                          <p className="label-caps mb-4 text-stone-400">Collections</p>
-                          <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
-                            {watchNav.map((p) => (
-                              <Link
-                                key={p.slug}
-                                href={`/product/${p.slug}`}
-                                className="group/link flex items-center justify-between text-[13.5px] text-ink-soft transition-colors hover:text-brass-600"
-                              >
-                                {p.name}
-                                <ChevronRight
-                                  size={13}
-                                  className="opacity-0 transition-opacity group-hover/link:opacity-100"
-                                />
-                              </Link>
-                            ))}
-                          </div>
-                          <Link
-                            href="/category/watches"
-                            className="mt-5 inline-block text-[12px] font-medium uppercase tracking-wider2 text-brass-600 link-underline"
-                          >
-                            View all watches
-                          </Link>
-                        </div>
-                        {featuredWatch && (
-                          <Link href={`/product/${featuredWatch.slug}`} className="group/feat relative block overflow-hidden bg-cream">
-                            <Image
-                              src={featuredWatch.image}
-                              alt={featuredWatch.name}
-                              width={320}
-                              height={360}
-                              className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover/feat:scale-105"
-                            />
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-4">
-                              <p className="text-[10px] uppercase tracking-wider2 text-brass-300">
-                                Bestseller
-                              </p>
-                              <p className="font-serif text-lg text-paper">{featuredWatch.name}</p>
-                            </div>
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-          </div>
-
-          {/* Center — wordmark */}
-          <Link
-            href="/"
-            className="shrink-0 text-center"
-            aria-label={`${storeName} home`}
-          >
-            <span className="block font-serif text-[26px] font-semibold leading-none tracking-[0.16em] text-ink">
-              {storeName}
-            </span>
-            <span className="mt-0.5 hidden text-[8px] uppercase tracking-luxe text-stone-400 sm:block">
-              {established}
-            </span>
-          </Link>
-
-          {/* Right — actions */}
-          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
             <button
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
               aria-label="Search"
-              className="grid h-10 w-10 place-items-center text-ink transition-colors hover:text-brass-600"
+              className="hidden h-11 items-center gap-2.5 text-paper/80 transition-colors hover:text-brass-300 lg:flex"
+            >
+              <Search size={19} strokeWidth={1.5} />
+              <span className="text-[12px] uppercase tracking-wider2">Search</span>
+            </button>
+          </div>
+
+          {/* Center — prominent wordmark */}
+          <Link href="/" className="shrink-0 text-center" aria-label={`${storeName} home`}>
+            <span className="block font-serif text-[30px] font-semibold leading-none tracking-[0.2em] text-paper sm:text-[34px] lg:text-[38px]">
+              {storeName}
+            </span>
+            <span className="mt-1 block text-[8.5px] uppercase tracking-luxe text-brass-300/90">
+              {established}
+            </span>
+          </Link>
+
+          {/* Right */}
+          <div className="flex flex-1 items-center justify-end gap-0.5 sm:gap-1.5">
+            <CurrencySelect />
+            <button
+              type="button"
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label="Search"
+              className="grid h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300 lg:hidden"
             >
               <Search size={19} strokeWidth={1.5} />
             </button>
             <Link
               href={user ? "/account" : "/account/login"}
               aria-label={user ? "Your account" : "Sign in"}
-              className="relative hidden h-10 w-10 place-items-center text-ink transition-colors hover:text-brass-600 sm:grid"
+              className="relative hidden h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300 sm:grid"
             >
               <User size={19} strokeWidth={1.5} />
               {user && (
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brass-500 ring-2 ring-paper" />
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brass-400 ring-2 ring-ink" />
               )}
             </Link>
             <button
               type="button"
               onClick={openCart}
               aria-label="Open cart"
-              className="relative grid h-10 w-10 place-items-center text-ink transition-colors hover:text-brass-600"
+              className="relative grid h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300"
             >
               <ShoppingBag size={19} strokeWidth={1.5} />
               {count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-brass-500 px-1 text-[10px] font-semibold text-ink">
+                <span className="absolute -right-0.5 top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-brass-400 px-1 text-[10px] font-bold text-ink">
                   {count}
                 </span>
               )}
@@ -215,23 +146,98 @@ export function Header({
         </div>
       </div>
 
+      {/* Nav row (desktop) */}
+      <nav className="hidden border-t border-white/10 lg:block">
+        <div className="container-luxe flex items-center justify-center gap-9">
+          {nav.map((item) => {
+            const active =
+              item.href !== "/" && pathname?.startsWith(item.href) && item.href !== "/account/orders";
+            return (
+              <div key={item.label} className="group/nav relative">
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-1.5 py-4 text-[12px] font-semibold uppercase tracking-wider2 transition-colors",
+                    active ? "text-brass-300" : "text-paper/85 hover:text-brass-300",
+                  )}
+                >
+                  {item.label}
+                </Link>
+                {active && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-brass-400" />}
+
+                {item.mega && (
+                  <div className="invisible absolute left-1/2 top-full z-50 w-[640px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-300 ease-luxe group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
+                    <div className="grid grid-cols-[1.2fr_1fr] gap-6 rounded-b-2xl border border-stone-200 bg-paper p-6 text-ink shadow-lift">
+                      <div>
+                        <p className="label-caps mb-4 text-stone-400">Collections</p>
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                          {watchNav.map((p) => (
+                            <Link
+                              key={p.slug}
+                              href={`/product/${p.slug}`}
+                              className="group/link flex items-center justify-between text-[13.5px] text-ink-soft transition-colors hover:text-brass-600"
+                            >
+                              {p.name}
+                              <ChevronRight
+                                size={13}
+                                className="opacity-0 transition-opacity group-hover/link:opacity-100"
+                              />
+                            </Link>
+                          ))}
+                        </div>
+                        <Link
+                          href="/category/watches"
+                          className="mt-5 inline-block text-[12px] font-medium uppercase tracking-wider2 text-brass-600 link-underline"
+                        >
+                          View all watches
+                        </Link>
+                      </div>
+                      {featuredWatch && (
+                        <Link
+                          href={`/product/${featuredWatch.slug}`}
+                          className="group/feat relative block overflow-hidden rounded-xl bg-cream"
+                        >
+                          <Image
+                            src={featuredWatch.image}
+                            alt={featuredWatch.name}
+                            width={320}
+                            height={360}
+                            className="h-full w-full object-cover transition-transform duration-700 ease-luxe group-hover/feat:scale-105"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/70 to-transparent p-4">
+                            <p className="text-[10px] uppercase tracking-wider2 text-brass-300">
+                              Bestseller
+                            </p>
+                            <p className="font-serif text-lg text-paper">{featuredWatch.name}</p>
+                          </div>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </nav>
+
       {/* Search dropdown */}
       <div
         className={cn(
-          "overflow-hidden border-stone-200 bg-paper transition-all duration-300 ease-luxe",
+          "overflow-hidden border-white/10 bg-ink-soft transition-all duration-300 ease-luxe",
           searchOpen ? "max-h-32 border-t" : "max-h-0",
         )}
       >
         <form onSubmit={submitSearch} className="container-luxe flex items-center gap-3 py-5">
-          <Search size={20} className="text-stone-400" />
+          <Search size={20} className="text-paper/50" />
           <input
             autoFocus={searchOpen}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search watches, perfumes, jewelry…"
-            className="flex-1 bg-transparent text-base outline-none placeholder:text-stone-400"
+            className="flex-1 bg-transparent text-base text-paper outline-none placeholder:text-paper/40"
           />
-          <button type="submit" className="text-[12px] font-medium uppercase tracking-wider2 text-brass-600">
+          <button type="submit" className="text-[12px] font-semibold uppercase tracking-wider2 text-brass-300">
             Search
           </button>
         </form>
@@ -253,13 +259,13 @@ export function Header({
         />
         <div
           className={cn(
-            "absolute left-0 top-0 h-full w-[84%] max-w-sm bg-paper shadow-lift transition-transform duration-400 ease-luxe",
+            "absolute left-0 top-0 h-full w-[84%] max-w-sm bg-paper text-ink shadow-lift transition-transform duration-400 ease-luxe",
             menuOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <div className="flex items-center justify-between border-b border-stone-200 px-5 py-4">
-            <span className="font-serif text-xl font-semibold tracking-[0.14em]">{storeName}</span>
-            <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-ink">
+          <div className="flex items-center justify-between border-b border-stone-200 bg-ink px-5 py-5 text-paper">
+            <span className="font-serif text-2xl font-semibold tracking-[0.16em]">{storeName}</span>
+            <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-paper">
               <X size={22} strokeWidth={1.5} />
             </button>
           </div>
@@ -270,14 +276,7 @@ export function Header({
                 href={item.href}
                 className="flex items-center justify-between border-b border-stone-100 py-4 font-serif text-2xl text-ink"
               >
-                <span className="flex items-center gap-2">
-                  {item.label}
-                  {item.soon && (
-                    <span className="rounded-full bg-brass-100 px-2 py-0.5 text-[9px] uppercase tracking-wider text-brass-700">
-                      Soon
-                    </span>
-                  )}
-                </span>
+                {item.label}
                 <ChevronRight size={18} className="text-stone-300" />
               </Link>
             ))}
@@ -293,6 +292,12 @@ export function Header({
                   className="flex items-center gap-3 py-3 text-sm uppercase tracking-wider2 text-ink-muted"
                 >
                   <User size={18} /> My account
+                </Link>
+                <Link
+                  href="/account/orders"
+                  className="flex items-center gap-3 py-3 text-sm uppercase tracking-wider2 text-ink-muted"
+                >
+                  <Package size={18} /> Track order
                 </Link>
                 <form action={logoutAction}>
                   <button

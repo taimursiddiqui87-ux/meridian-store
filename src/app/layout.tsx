@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { Chrome } from "@/components/layout/Chrome";
 import { getSiteConfig } from "@/lib/settings";
 import { getProductsByCategory } from "@/lib/products";
@@ -40,11 +41,18 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <CartProvider>
-          <Chrome store={config.store} announcements={config.announcements} watchNav={watchNav}>
-            {children}
-          </Chrome>
-        </CartProvider>
+        <CurrencyProvider config={config.currency}>
+          <CartProvider>
+            <Chrome
+              store={config.store}
+              announcements={config.announcements}
+              watchNav={watchNav}
+              sale={config.sale}
+            >
+              {children}
+            </Chrome>
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );
