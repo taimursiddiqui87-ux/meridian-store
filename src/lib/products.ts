@@ -84,8 +84,12 @@ async function readActive(): Promise<Product[]> {
   }
 }
 
-/** Cached storefront catalog (revalidated via the "products" tag on any admin save). */
-export const getProducts = unstable_cache(readActive, ["products"], {
+/**
+ * Cached storefront catalog (revalidated via the "products" tag on any admin save).
+ * Bump the key version after any out-of-band DB migration — Vercel's data cache
+ * survives deploys, so a stale entry would otherwise serve old product data.
+ */
+export const getProducts = unstable_cache(readActive, ["products-v2"], {
   tags: ["products"],
   revalidate: 300,
 });
