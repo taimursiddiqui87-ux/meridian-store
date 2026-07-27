@@ -5,6 +5,7 @@ import { AnnouncementBar } from "./AnnouncementBar";
 import { SaleBar } from "./SaleBar";
 import { Header, type NavProduct } from "./Header";
 import { Footer } from "./Footer";
+import { WhatsAppButton } from "./WhatsAppButton";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import type { SiteConfig } from "@/lib/settings";
 
@@ -42,6 +43,7 @@ export function Chrome({
       />
       <main>{children}</main>
       <Footer store={store} />
+      <WhatsAppButton number={store.whatsapp} message={store.whatsappMessage} />
       <CartDrawer />
     </>
   );

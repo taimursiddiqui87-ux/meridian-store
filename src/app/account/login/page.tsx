@@ -19,7 +19,7 @@ export default function LoginPage() {
       quote="Time is the ultimate luxury — wear it well."
     >
       <h1 className="font-serif text-4xl">Welcome back</h1>
-      <p className="mt-2 text-sm text-ink-muted">Sign in to your Meridian account.</p>
+      <p className="mt-2 text-sm text-ink-muted">Sign in to your account.</p>
 
       {state.error && (
         <div className="mt-6 flex items-start gap-2 border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-danger">
@@ -65,7 +65,7 @@ export default function LoginPage() {
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-muted">
-        New to Meridian?{" "}
+        New here?{" "}
         <Link href="/account/signup" className="font-medium text-ink link-underline">
           Create an account
         </Link>

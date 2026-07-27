@@ -126,6 +126,22 @@ export function SettingsAdmin({
                   <input className="field-input" value={cfg.store.phone} onChange={(e) => setStore("phone", e.target.value)} />
                 </Field>
                 <div />
+                <Field label="WhatsApp number (with country code)">
+                  <input
+                    className="field-input"
+                    placeholder="e.g. 923001234567 — leave blank to hide the button"
+                    value={cfg.store.whatsapp}
+                    onChange={(e) => setStore("whatsapp", e.target.value)}
+                  />
+                </Field>
+                <Field label="WhatsApp greeting message">
+                  <input
+                    className="field-input"
+                    placeholder="Pre-filled message when a customer taps the button"
+                    value={cfg.store.whatsappMessage}
+                    onChange={(e) => setStore("whatsappMessage", e.target.value)}
+                  />
+                </Field>
                 <Field label="Instagram URL">
                   <input className="field-input" value={cfg.store.instagram} onChange={(e) => setStore("instagram", e.target.value)} />
                 </Field>

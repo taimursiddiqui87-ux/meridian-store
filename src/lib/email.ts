@@ -1,10 +1,31 @@
 import { Resend } from "resend";
+import { getSiteConfigFresh } from "./settings";
 import type { Order, OrderItem } from "@prisma/client";
 import { formatPrice } from "./utils";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = process.env.EMAIL_FROM || "MERIDIAN <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://meridian-store-beige.vercel.app";
+
+/** Store name for email copy — follows whatever the client sets in Settings. */
+async function storeName(): Promise<string> {
+  try {
+    const { store } = await getSiteConfigFresh();
+    return store.name || "ZAMIRA";
+  } catch {
+    return "ZAMIRA";
+  }
+}
+
+/**
+ * Keeps the sending address from EMAIL_FROM but always uses the current store
+ * name as the display name, so renaming the store never leaves a stale brand.
+ */
+function fromAddress(name: string): string {
+  const raw = process.env.EMAIL_FROM || "onboarding@resend.dev";
+  const match = raw.match(/<([^>]+)>/);
+  const address = (match ? match[1] : raw).trim();
+  return `${name} <${address}>`;
+}
 
 type FullOrder = Order & { items: OrderItem[] };
 
@@ -20,7 +41,8 @@ const methodLabel: Record<string, string> = {
 
 /** Sends the customer confirmation AND the admin new-order notification. */
 export async function sendOrderEmails(order: FullOrder) {
-  await Promise.allSettled([sendCustomerConfirmation(order), sendAdminNotification(order)]);
+  const name = await storeName();
+  await Promise.allSettled([sendCustomerConfirmation(order, name), sendAdminNotification(order, name)]);
 }
 
 /** Emails a customer's contact-form message to the store admin. Returns true if dispatched. */
@@ -37,7 +59,7 @@ export async function sendContactEmail(msg: {
   }
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromAddress(await storeName()),
       to: adminEmail,
       replyTo: msg.email,
       subject: `Contact form: ${msg.subject || "New message"}`,
@@ -63,16 +85,17 @@ export async function sendPasswordResetEmail(to: string, link: string): Promise<
     console.log("[email] RESEND_API_KEY not set — password reset link for", to, "→", link);
     return false;
   }
+  const name = await storeName();
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromAddress(name),
       to,
-      subject: "Reset your MERIDIAN password",
+      subject: `Reset your ${name} password`,
       html: `
       <div style="background:#F6F1E9;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
         <div style="max-width:520px;margin:0 auto;background:#FBF9F5;border:1px solid #EEEAE2;">
           <div style="background:#17130F;padding:28px;text-align:center;">
-            <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:4px;color:#FBF9F5;">MERIDIAN</div>
+            <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:4px;color:#FBF9F5;">${name}</div>
           </div>
           <div style="padding:32px 28px;">
             <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#B0863F;">Password reset</div>
@@ -94,7 +117,7 @@ export async function sendPasswordResetEmail(to: string, link: string): Promise<
   }
 }
 
-async function sendCustomerConfirmation(order: FullOrder) {
+async function sendCustomerConfirmation(order: FullOrder, name: string) {
   if (!resend) {
     console.log("[email] RESEND_API_KEY not set — skipping customer email for", order.orderNumber);
     return;
@@ -102,17 +125,17 @@ async function sendCustomerConfirmation(order: FullOrder) {
   if (!order.email) return;
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromAddress(name),
       to: order.email,
-      subject: `Your MERIDIAN order ${order.orderNumber} is confirmed`,
-      html: renderOrderEmail(order, "customer"),
+      subject: `Your ${name} order ${order.orderNumber} is confirmed`,
+      html: renderOrderEmail(order, "customer", name),
     });
   } catch (e) {
     console.error("[email] customer confirmation failed", e);
   }
 }
 
-async function sendAdminNotification(order: FullOrder) {
+async function sendAdminNotification(order: FullOrder, name: string) {
   if (!resend) {
     console.log("[email] RESEND_API_KEY not set — skipping admin email for", order.orderNumber);
     return;
@@ -124,17 +147,17 @@ async function sendAdminNotification(order: FullOrder) {
   }
   try {
     await resend.emails.send({
-      from: FROM,
+      from: fromAddress(name),
       to: adminEmail,
       subject: `New order ${order.orderNumber} · ${formatPrice(order.total)} · ${methodLabel[order.paymentMethod] ?? order.paymentMethod}`,
-      html: renderOrderEmail(order, "admin"),
+      html: renderOrderEmail(order, "admin", name),
     });
   } catch (e) {
     console.error("[email] admin notification failed", e);
   }
 }
 
-function renderOrderEmail(order: FullOrder, variant: "customer" | "admin") {
+function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand: string) {
   const isAdmin = variant === "admin";
   const method = methodLabel[order.paymentMethod] ?? order.paymentMethod;
 
@@ -178,7 +201,7 @@ function renderOrderEmail(order: FullOrder, variant: "customer" | "admin") {
   <div style="background:#F6F1E9;padding:32px 16px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:560px;margin:0 auto;background:#FBF9F5;border:1px solid #EEEAE2;">
       <div style="background:#17130F;padding:28px;text-align:center;">
-        <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:4px;color:#FBF9F5;">MERIDIAN</div>
+        <div style="font-family:Georgia,serif;font-size:26px;letter-spacing:4px;color:#FBF9F5;">${brand}</div>
       </div>
       <div style="padding:32px 28px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#B0863F;">${eyebrow}</div>

@@ -54,16 +54,20 @@ function SidebarContent({
   onNavigate,
   username,
   initials,
+  storeName,
 }: {
   pathname: string;
   onNavigate?: () => void;
   username: string;
   initials: string;
+  storeName: string;
 }) {
   return (
     <div className="flex h-full flex-col bg-ink text-paper">
       <div className="flex h-16 items-center gap-2 border-b border-white/10 px-6">
-        <span className="font-serif text-xl font-semibold tracking-[0.14em]">MERIDIAN</span>
+        <span className="bg-gradient-to-b from-brass-300 via-brass-400 to-brass-600 bg-clip-text font-serif text-xl font-semibold tracking-[0.14em] text-transparent">
+          {storeName}
+        </span>
         <span className="rounded bg-brass-500/20 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-brass-300">
           Admin
         </span>
@@ -131,9 +135,11 @@ function SidebarContent({
 export function AdminShell({
   children,
   admin,
+  storeName,
 }: {
   children: React.ReactNode;
   admin: { username: string };
+  storeName: string;
 }) {
   const pathname = usePathname() ?? "/admin";
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -144,7 +150,7 @@ export function AdminShell({
   return (
     <div className="min-h-screen bg-[#F4F2EC] text-ink">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 lg:block">
-        <SidebarContent pathname={pathname} username={username} initials={initials} />
+        <SidebarContent pathname={pathname} username={username} initials={initials} storeName={storeName} />
       </aside>
 
       <div className={cn("fixed inset-0 z-50 lg:hidden", mobileOpen ? "" : "pointer-events-none")}>
@@ -163,6 +169,7 @@ export function AdminShell({
             onNavigate={() => setMobileOpen(false)}
             username={username}
             initials={initials}
+            storeName={storeName}
           />
         </div>
       </div>

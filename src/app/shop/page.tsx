@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Shop All",
-  description: "Every Meridian — watches, perfumes and jewelry — in one place.",
+  description: "Everything we make — watches, perfumes and jewelry — in one place.",
 };
 
 export const revalidate = 300;
@@ -25,7 +25,7 @@ export default async function ShopPage({
             <div>
               <h1 className="font-serif text-4xl leading-none sm:text-5xl">Shop All</h1>
               <p className="mt-3 max-w-xl text-ink-muted">
-                Every Meridian in one place — timepieces, extraits de parfum and hand-finished
+                Everything we make in one place — timepieces, extraits de parfum and hand-finished
                 jewelry, all built to be kept.
               </p>
             </div>

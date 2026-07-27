@@ -3,15 +3,15 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 
-const COOKIE = "meridian_session";
-const ADMIN_COOKIE = "meridian_admin";
+const COOKIE = "zamira_session";
+const ADMIN_COOKIE = "zamira_admin";
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 16) {
     // Fallback keeps local dev working before AUTH_SECRET is set; NOT for production.
-    return new TextEncoder().encode("meridian-dev-insecure-secret-change-me");
+    return new TextEncoder().encode("zamira-dev-insecure-secret-change-me");
   }
   return new TextEncoder().encode(secret);
 }

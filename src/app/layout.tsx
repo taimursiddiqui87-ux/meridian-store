@@ -9,7 +9,7 @@ import { getProductsByCategory } from "@/lib/products";
 export async function generateMetadata(): Promise<Metadata> {
   const { store } = await getSiteConfig();
   return {
-    metadataBase: new URL("https://meridian.example"),
+    metadataBase: new URL("https://zamira.pk"),
     title: {
       default: `${store.name} — ${store.tagline}`,
       template: `%s · ${store.name}`,

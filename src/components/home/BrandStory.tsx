@@ -16,7 +16,7 @@ export function BrandStory() {
         <div className="relative aspect-[4/5] overflow-hidden lg:aspect-[5/6]">
           <Image
             src={img("1533139502658-0198f920d8e8", 1200)}
-            alt="Meridian watchmaking"
+            alt="Watchmaking at the bench"
             fill
             sizes="(max-width:1024px) 100vw, 50vw"
             className="object-cover"
@@ -30,7 +30,7 @@ export function BrandStory() {
             Built by hand, in the quiet hours, to be worn for decades.
           </h2>
           <p className="mt-6 max-w-lg leading-relaxed text-paper/70 text-pretty">
-            Every Meridian begins as a sketch and ends on your wrist only after passing through the hands
+            Every piece begins as a sketch and ends on your wrist only after passing through the hands
             of a single watchmaker. We regulate each movement in six positions, pressure-test every case,
             and finish what most brands hide. The result is a timepiece with nothing to prove and nothing
             to apologise for.

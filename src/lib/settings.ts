@@ -17,6 +17,9 @@ export interface SiteConfig {
     established: string;
     email: string;
     phone: string;
+    /** Digits only, incl. country code (e.g. 923001234567). Empty hides the button. */
+    whatsapp: string;
+    whatsappMessage: string;
     instagram: string;
     facebook: string;
     youtube: string;
@@ -60,11 +63,13 @@ export interface SiteConfig {
 
 export const DEFAULT_CONFIG: SiteConfig = {
   store: {
-    name: "MERIDIAN",
-    tagline: "Timeless by design.",
-    established: "Est. 2019",
-    email: "care@meridian.example",
-    phone: "+1 (800) 555-0142",
+    name: "ZAMIRA",
+    tagline: "Timepieces · Fragrances · Fine Jewelry",
+    established: "Est. 2026",
+    email: "care@zamira.pk",
+    phone: "+92 300 000 0000",
+    whatsapp: "",
+    whatsappMessage: "Hi! I'd like to ask about a product on your store.",
     instagram: "#",
     facebook: "#",
     youtube: "#",
@@ -83,7 +88,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       subtitle: "A cross-section of the pieces we’re proudest of.",
       ctaLabel: "Shop all",
       ctaHref: "/shop",
-      productSlugs: ["meridian-aera-39", "ambre-meridien", "solstice-band", "meridian-heritage-1968"],
+      productSlugs: ["zamira-aera-39", "ambre-royale", "solstice-band", "zamira-heritage-1968"],
       visible: true,
     },
     bestsellers: {
@@ -91,7 +96,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       subtitle: "The pieces our customers reach for most.",
       ctaLabel: "Shop watches",
       ctaHref: "/category/watches",
-      productSlugs: ["meridian-aera-39", "meridian-noir-chronograph", "ambre-meridien", "solstice-band"],
+      productSlugs: ["zamira-aera-39", "zamira-noir-chronograph", "ambre-royale", "solstice-band"],
       visible: true,
     },
     newArrivals: {
@@ -99,7 +104,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
       subtitle: "Just landed across the collections.",
       ctaLabel: "View new",
       ctaHref: "/shop?sort=new",
-      productSlugs: ["meridian-terra-gmt", "rose-infinie", "lune-pendant", "meridien-hoops"],
+      productSlugs: ["zamira-terra-gmt", "rose-infinie", "lune-pendant", "lumiere-hoops"],
       visible: true,
     },
   },
@@ -107,7 +112,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     heroEyebrow: "Our Story",
     heroTitle: "Time, kept honestly",
     intro:
-      "Meridian began with a simple frustration: the watches we loved cost more than a car, and the ones we could afford felt like it. So we built the watch we wanted — Swiss-grade mechanics, obsessive finishing, and a price that respects you.",
+      "ZAMIRA began with a simple frustration: the watches we loved cost more than a car, and the ones we could afford felt like it. So we built the watch we wanted — Swiss-grade mechanics, obsessive finishing, and a price that respects you.",
     values: [
       { title: "Made to last", body: "Over-engineered movements, sapphire crystal and full-grain straps — built for decades, not seasons." },
       { title: "Honest pricing", body: "We sell direct, so you pay for the watch — not the marketing, the middlemen or the marble boutique." },
@@ -122,7 +127,7 @@ export const DEFAULT_CONFIG: SiteConfig = {
     storyEyebrow: "The Workshop",
     storyTitle: "Every watch passes through one pair of hands",
     storyBody:
-      "From the first turn of the crown to the final pressure test, a single watchmaker sees each Meridian through. It’s slower. It’s more expensive. And it’s the only way we know how to build something worth keeping.",
+      "From the first turn of the crown to the final pressure test, a single watchmaker sees each piece through. It’s slower. It’s more expensive. And it’s the only way we know how to build something worth keeping.",
   },
   checkout: {
     freeShippingThreshold: 15000, // free shipping at $150+

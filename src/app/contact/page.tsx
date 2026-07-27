@@ -3,6 +3,8 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { getSiteConfig } from "@/lib/settings";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { ContactForm } from "@/components/marketing/ContactForm";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
+import { waLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -12,6 +14,7 @@ export const revalidate = 3600;
 
 export default async function ContactPage() {
   const { store } = await getSiteConfig();
+  const whatsappHref = waLink(store.whatsapp, store.whatsappMessage);
 
   return (
     <div className="container-luxe py-10 lg:py-16">
@@ -42,6 +45,24 @@ export default async function ContactPage() {
                   <p className="text-[11px] uppercase tracking-wider2 text-stone-400">Phone</p>
                   <a href={`tel:${store.phone.replace(/\s/g, "")}`} className="text-ink link-underline">
                     {store.phone}
+                  </a>
+                </div>
+              </div>
+            )}
+            {whatsappHref && (
+              <div className="flex items-start gap-4">
+                <span className="mt-0.5 text-[#25D366]">
+                  <WhatsAppIcon size={20} />
+                </span>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider2 text-stone-400">WhatsApp</p>
+                  <a
+                    href={whatsappHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-ink link-underline"
+                  >
+                    Chat with us — fastest reply
                   </a>
                 </div>
               </div>

@@ -27,8 +27,11 @@ interface CartContextValue {
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
-const STORAGE_KEY = "meridian.cart.v1";
-const COUPON_KEY = "meridian.coupon.v1";
+const STORAGE_KEY = "zamira.cart.v1";
+const COUPON_KEY = "zamira.coupon.v1";
+// Previous keys, read once so in-flight carts survive the rename.
+const LEGACY_STORAGE_KEY = "meridian.cart.v1";
+const LEGACY_COUPON_KEY = "meridian.coupon.v1";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -39,10 +42,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Load persisted cart + coupon once on mount.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
       if (raw) setLines(JSON.parse(raw));
-      const code = localStorage.getItem(COUPON_KEY);
+      const code = localStorage.getItem(COUPON_KEY) ?? localStorage.getItem(LEGACY_COUPON_KEY);
       if (code) setCouponCodeState(code);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_COUPON_KEY);
     } catch {
       /* ignore */
     }

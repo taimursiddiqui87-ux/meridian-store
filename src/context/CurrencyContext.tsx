@@ -30,7 +30,7 @@ interface CurrencyContextValue {
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
-const STORAGE_KEY = "meridian.currency.v1";
+const STORAGE_KEY = "zamira.currency.v1";
 
 export function CurrencyProvider({
   config,

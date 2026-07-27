@@ -20,7 +20,7 @@ export const revalidate = 300;
 
 export default async function Home() {
   const banners = await getHeroBanners();
-  const { home } = await getSiteConfig();
+  const { home, store } = await getSiteConfig();
   const catalog = await getProducts();
   const bySlug = new Map(catalog.map((p) => [p.slug, p]));
   const resolve = (slugs: string[]): Product[] =>
@@ -102,7 +102,7 @@ export default async function Home() {
       </section>
 
       <Testimonials testimonials={testimonials} />
-      <InstagramGrid />
+      <InstagramGrid storeName={store.name} />
     </>
   );
 }

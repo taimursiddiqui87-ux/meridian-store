@@ -2,13 +2,15 @@ import Image from "next/image";
 import { Instagram } from "lucide-react";
 import { instagramImages } from "@/lib/data";
 
-export function InstagramGrid() {
+export function InstagramGrid({ storeName = "ZAMIRA" }: { storeName?: string }) {
+  const handle = storeName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  const tag = storeName.replace(/[^a-zA-Z0-9]/g, "");
   return (
     <section className="container-luxe py-20 lg:py-24">
       <div className="mb-10 text-center">
         <p className="eyebrow justify-center">Follow Along</p>
-        <h2 className="mt-3 font-serif text-4xl sm:text-5xl">@meridian</h2>
-        <p className="mt-3 text-ink-muted">Tag #WornOnMeridian to be featured.</p>
+        <h2 className="mt-3 font-serif text-4xl sm:text-5xl">@{handle}</h2>
+        <p className="mt-3 text-ink-muted">Tag #WornOn{tag} to be featured.</p>
       </div>
 
       <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6">

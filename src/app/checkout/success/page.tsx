@@ -89,7 +89,7 @@ export default async function CheckoutSuccessPage({
         )}
 
         <p className="mt-6 text-sm text-ink-muted">
-          You’ll receive tracking details within 24 hours. Every Meridian ships insured.
+          You’ll receive tracking details within 24 hours. Every order ships insured.
         </p>
         <div className="mt-8 flex justify-center gap-3">
           <Link href="/shop" className="btn-primary">Continue shopping</Link>
