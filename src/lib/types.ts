@@ -35,6 +35,8 @@ export interface Product {
   shortDescription: string;
   description: string;
   images: string[];
+  /** Optional product video (mp4/webm) shown in the gallery. */
+  videoUrl?: string;
   variants: ProductVariant[];
   specs: Spec[];
   features: string[];

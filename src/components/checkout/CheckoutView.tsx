@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Banknote,
-  CreditCard,
   ShieldCheck,
   Truck,
   AlertCircle,
@@ -21,6 +19,7 @@ import { useAppliedCoupon } from "@/hooks/useAppliedCoupon";
 import { computeTotals, type CheckoutRules } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { placeOrder } from "@/app/actions/checkout";
+import { PaymentMark } from "@/components/checkout/PaymentMarks";
 
 const methods = [
   {
@@ -30,9 +29,18 @@ const methods = [
     live: true,
   },
   { id: "card", label: "Debit / Credit Card", desc: "Visa · Mastercard", live: false },
+  { id: "stripe", label: "Stripe", desc: "Cards, Apple Pay & Google Pay", live: false },
+  { id: "payoneer", label: "Payoneer", desc: "International payments", live: false },
+  { id: "fastpay", label: "FastPay", desc: "Fast local bank transfer", live: false },
   { id: "jazzcash", label: "JazzCash", desc: "Mobile wallet & cards", live: false },
   { id: "easypaisa", label: "Easypaisa", desc: "Mobile wallet & cards", live: false },
 ];
+
+/** Methods that collect an account/email rather than a card or wallet number. */
+const ACCOUNT_METHODS: Record<string, string> = {
+  payoneer: "Payoneer account email",
+  fastpay: "FastPay account ID or registered mobile",
+};
 
 const COUNTRIES = [
   "Pakistan",
@@ -43,11 +51,6 @@ const COUNTRIES = [
   "Saudi Arabia",
   "Other",
 ];
-
-const brandMark: Record<string, { bg: string; text: string; label: string }> = {
-  jazzcash: { bg: "#B01C2E", text: "#fff", label: "JC" },
-  easypaisa: { bg: "#1FA64A", text: "#fff", label: "ep" },
-};
 
 /** Focused, chrome-less checkout shell with its own minimal branded header. */
 function Shell({ storeName, children }: { storeName: string; children: React.ReactNode }) {
@@ -253,7 +256,6 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
               <div className="overflow-hidden rounded-lg border border-stone-200">
                 {methods.map((m, i) => {
                   const active = method === m.id;
-                  const mark = brandMark[m.id];
                   return (
                     <div key={m.id} className={cn(i > 0 && "border-t border-stone-200")}>
                       <button
@@ -272,23 +274,11 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
                         >
                           {active && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
                         </span>
-                        <span className="flex-1 text-[14px] font-medium text-ink">{m.label}</span>
-                        {m.id === "cod" && <Banknote size={20} className="text-brass-600" />}
-                        {m.id === "card" && (
-                          <span className="flex items-center gap-1">
-                            <span className="rounded border border-stone-200 px-1.5 py-0.5 text-[9px] font-bold text-[#1A1F71]">VISA</span>
-                            <span className="rounded border border-stone-200 px-1.5 py-0.5 text-[9px] font-bold text-[#EB001B]">MC</span>
-                            <CreditCard size={18} className="ml-0.5 text-brass-600" />
-                          </span>
-                        )}
-                        {mark && (
-                          <span
-                            className="grid h-6 w-9 place-items-center rounded text-[11px] font-bold"
-                            style={{ backgroundColor: mark.bg, color: mark.text }}
-                          >
-                            {mark.label}
-                          </span>
-                        )}
+                        <span className="flex-1">
+                          <span className="block text-[14px] font-medium text-ink">{m.label}</span>
+                          <span className="block text-[11.5px] text-ink-muted">{m.desc}</span>
+                        </span>
+                        <PaymentMark method={m.id} />
                         {m.live ? (
                           <span className="rounded-full bg-success/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-success">
                             Live
@@ -312,6 +302,18 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
                               <input placeholder="MM / YY" className="field-input rounded-lg" inputMode="numeric" />
                               <input placeholder="CVC" className="field-input rounded-lg" inputMode="numeric" />
                             </div>
+                          )}
+                          {m.id === "stripe" && (
+                            <p className="text-[13px] leading-relaxed text-ink-soft">
+                              You&apos;ll be redirected to Stripe&apos;s secure page to pay by card,
+                              Apple&nbsp;Pay or Google&nbsp;Pay.
+                            </p>
+                          )}
+                          {ACCOUNT_METHODS[m.id] && (
+                            <input
+                              placeholder={ACCOUNT_METHODS[m.id]}
+                              className="field-input rounded-lg"
+                            />
                           )}
                           {(m.id === "jazzcash" || m.id === "easypaisa") && (
                             <input

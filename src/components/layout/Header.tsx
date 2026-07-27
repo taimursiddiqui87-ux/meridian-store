@@ -81,7 +81,7 @@ export function Header({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-ink text-paper shadow-soft">
+    <header className="glass sticky top-0 z-40 border-b border-black/[0.06] text-ink">
       {/* Main bar — search / big centered wordmark / currency + account + cart */}
       <div className="container-luxe">
         <div className="relative flex h-[74px] items-center justify-between gap-3 lg:h-[86px]">
@@ -91,7 +91,7 @@ export function Header({
               type="button"
               onClick={() => setMenuOpen(true)}
               aria-label="Open menu"
-              className="-ml-2 grid h-11 w-11 place-items-center text-paper lg:hidden"
+              className="-ml-2 grid h-11 w-11 place-items-center text-ink lg:hidden"
             >
               <Menu size={22} strokeWidth={1.5} />
             </button>
@@ -99,7 +99,7 @@ export function Header({
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
               aria-label="Search"
-              className="hidden h-11 items-center gap-2.5 text-paper/80 transition-colors hover:text-brass-300 lg:flex"
+              className="hidden h-11 items-center gap-2.5 text-ink-muted transition-colors hover:text-ink lg:flex"
             >
               <Search size={19} strokeWidth={1.5} />
               <span className="text-[12px] uppercase tracking-wider2">Search</span>
@@ -108,12 +108,12 @@ export function Header({
 
           {/* Center — prominent gold wordmark (matches the ZAMIRA logo lockup) */}
           <Link href="/" className="shrink-0 text-center" aria-label={`${storeName} home`}>
-            <span className="block bg-gradient-to-b from-[#F0E3BC] via-brass-400 to-brass-700 bg-clip-text font-serif text-[30px] font-semibold leading-none tracking-[0.2em] text-transparent sm:text-[34px] lg:text-[38px]">
+            <span className="block bg-gradient-to-b from-brass-400 via-brass-600 to-brass-800 bg-clip-text font-serif text-[30px] font-semibold leading-none tracking-[0.2em] text-transparent sm:text-[34px] lg:text-[38px]">
               {storeName}
             </span>
-            <span className="mt-1.5 block text-[7px] uppercase tracking-[0.3em] text-paper/70 sm:text-[8px]">
+            <span className="mt-1.5 block text-[7px] uppercase tracking-[0.3em] text-stone-500 sm:text-[8px]">
               {tagline}
-              <span className="hidden text-brass-300/90 lg:inline"> · {established}</span>
+              <span className="hidden text-brass-600 lg:inline"> · {established}</span>
             </span>
           </Link>
 
@@ -124,29 +124,29 @@ export function Header({
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
               aria-label="Search"
-              className="grid h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300 lg:hidden"
+              className="grid h-11 w-11 place-items-center text-ink transition-colors hover:text-brass-600 lg:hidden"
             >
               <Search size={19} strokeWidth={1.5} />
             </button>
             <Link
               href={user ? "/account" : "/account/login"}
               aria-label={user ? "Your account" : "Sign in"}
-              className="relative hidden h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300 sm:grid"
+              className="relative hidden h-11 w-11 place-items-center text-ink transition-colors hover:text-brass-600 sm:grid"
             >
               <User size={19} strokeWidth={1.5} />
               {user && (
-                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brass-400 ring-2 ring-ink" />
+                <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-brass-500 ring-2 ring-white" />
               )}
             </Link>
             <button
               type="button"
               onClick={openCart}
               aria-label="Open cart"
-              className="relative grid h-11 w-11 place-items-center text-paper transition-colors hover:text-brass-300"
+              className="relative grid h-11 w-11 place-items-center text-ink transition-colors hover:text-brass-600"
             >
               <ShoppingBag size={19} strokeWidth={1.5} />
               {count > 0 && (
-                <span className="absolute -right-0.5 top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-brass-400 px-1 text-[10px] font-bold text-ink">
+                <span className="absolute -right-0.5 top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-ink px-1 text-[10px] font-bold text-paper">
                   {count}
                 </span>
               )}
@@ -156,7 +156,7 @@ export function Header({
       </div>
 
       {/* Nav row (desktop) */}
-      <nav className="hidden border-t border-white/10 lg:block">
+      <nav className="hidden border-t border-black/[0.06] lg:block">
         <div className="container-luxe flex items-center justify-center gap-9">
           {nav.map((item) => {
             const active =
@@ -167,12 +167,12 @@ export function Header({
                   href={item.href}
                   className={cn(
                     "flex items-center gap-1.5 py-4 text-[12px] font-semibold uppercase tracking-wider2 transition-colors",
-                    active ? "text-brass-300" : "text-paper/85 hover:text-brass-300",
+                    active ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
                   {item.label}
                 </Link>
-                {active && <span className="absolute inset-x-0 bottom-0 h-[2px] bg-brass-400" />}
+                {active && <span className="absolute inset-x-0 bottom-0 h-[2px] rounded-full bg-brass-500" />}
 
                 {item.mega && (
                   <div className="invisible absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 translate-y-2 opacity-0 transition-all duration-300 ease-luxe group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
@@ -244,20 +244,20 @@ export function Header({
       {/* Search dropdown */}
       <div
         className={cn(
-          "overflow-hidden border-white/10 bg-ink-soft transition-all duration-300 ease-luxe",
+          "overflow-hidden border-black/[0.06] bg-white/80 backdrop-blur-xl transition-all duration-300 ease-luxe",
           searchOpen ? "max-h-32 border-t" : "max-h-0",
         )}
       >
         <form onSubmit={submitSearch} className="container-luxe flex items-center gap-3 py-5">
-          <Search size={20} className="text-paper/50" />
+          <Search size={20} className="text-stone-400" />
           <input
             autoFocus={searchOpen}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search watches, perfumes, jewelry…"
-            className="flex-1 bg-transparent text-base text-paper outline-none placeholder:text-paper/40"
+            className="flex-1 bg-transparent text-base text-ink outline-none placeholder:text-stone-400"
           />
-          <button type="submit" className="text-[12px] font-semibold uppercase tracking-wider2 text-brass-300">
+          <button type="submit" className="text-[12px] font-semibold uppercase tracking-wider2 text-brass-600">
             Search
           </button>
         </form>
@@ -283,9 +283,11 @@ export function Header({
             menuOpen ? "translate-x-0" : "-translate-x-full",
           )}
         >
-          <div className="flex items-center justify-between border-b border-stone-200 bg-ink px-5 py-5 text-paper">
-            <span className="font-serif text-2xl font-semibold tracking-[0.16em]">{storeName}</span>
-            <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-paper">
+          <div className="flex items-center justify-between border-b border-stone-200 px-5 py-5">
+            <span className="bg-gradient-to-b from-brass-400 via-brass-600 to-brass-800 bg-clip-text font-serif text-2xl font-semibold tracking-[0.16em] text-transparent">
+              {storeName}
+            </span>
+            <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="text-ink">
               <X size={22} strokeWidth={1.5} />
             </button>
           </div>

@@ -21,7 +21,8 @@ export default async function AdminProductsPage() {
     compareAt: p.compareAtPrice ? Math.round(p.compareAtPrice / 100) : 0,
     stock: p.stock,
     active: p.active !== false,
-    image: p.images[0] ?? "",
+    images: p.images ?? [],
+    videoUrl: p.videoUrl ?? "",
     badge: p.badge ?? "",
   }));
 

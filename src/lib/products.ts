@@ -25,6 +25,7 @@ type Row = {
   shortDescription: string;
   description: string;
   images: unknown;
+  videoUrl: string | null;
   variants: unknown;
   specs: unknown;
   features: unknown;
@@ -53,6 +54,7 @@ function toProduct(row: Row): Product {
     shortDescription: row.shortDescription,
     description: row.description,
     images: Array.isArray(row.images) ? (row.images as string[]) : [],
+    videoUrl: row.videoUrl ?? undefined,
     variants: Array.isArray(row.variants) ? (row.variants as ProductVariant[]) : [],
     specs: Array.isArray(row.specs) ? (row.specs as Spec[]) : [],
     features: Array.isArray(row.features) ? (row.features as string[]) : [],

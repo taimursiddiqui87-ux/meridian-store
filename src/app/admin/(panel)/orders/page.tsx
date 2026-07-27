@@ -8,6 +8,9 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const methodLabel: Record<string, string> = {
   cod: "Cash on Delivery",
   card: "Card",
+  stripe: "Stripe",
+  payoneer: "Payoneer",
+  fastpay: "FastPay",
   jazzcash: "JazzCash",
   easypaisa: "Easypaisa",
 };

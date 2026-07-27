@@ -19,7 +19,9 @@ export interface ProductInput {
   compareAtDollars?: number | null;
   stock: number;
   active: boolean;
-  image: string;
+  /** Full gallery, first entry is the card/primary image. */
+  images: string[];
+  videoUrl?: string | null;
   badge?: string | null;
   shortDescription?: string;
   description?: string;
@@ -88,14 +90,15 @@ export async function saveProduct(input: ProductInput): Promise<ProductActionRes
         ? Math.round(Number(input.compareAtDollars) * 100)
         : null;
     const stock = Math.max(0, Math.round(Number(input.stock) || 0));
-    const image = input.image?.trim();
+    const gallery = (input.images ?? []).map((u) => u.trim()).filter(Boolean).slice(0, 8);
+    const videoUrl = input.videoUrl?.trim() || null;
 
     // Update path — only touch the fields the editor exposes; preserve the rest.
     if (input.id) {
       const existing = await prisma.product.findUnique({ where: { id: input.id } });
       if (existing) {
-        const images = Array.isArray(existing.images) ? [...(existing.images as string[])] : [];
-        if (image) images[0] = image;
+        const existingImages = Array.isArray(existing.images) ? (existing.images as string[]) : [];
+        const images = gallery.length ? gallery : existingImages;
         await prisma.product.update({
           where: { id: input.id },
           data: {
@@ -109,7 +112,8 @@ export async function saveProduct(input: ProductInput): Promise<ProductActionRes
             inStock: stock > 0,
             active: input.active,
             badge: input.badge?.trim() || null,
-            images: asJson(images.length ? images : [image || PLACEHOLDER_IMG]),
+            images: asJson(images.length ? images : [PLACEHOLDER_IMG]),
+            videoUrl,
             variantLabel: existing.variantLabel ?? VARIANT_LABELS[category],
             ...(input.shortDescription != null ? { shortDescription: input.shortDescription } : {}),
             ...(input.description != null ? { description: input.description } : {}),
@@ -136,7 +140,8 @@ export async function saveProduct(input: ProductInput): Promise<ProductActionRes
         variantLabel: VARIANT_LABELS[category],
         shortDescription: input.shortDescription?.trim() || "",
         description: input.description?.trim() || name,
-        images: asJson([image || PLACEHOLDER_IMG]),
+        images: asJson(gallery.length ? gallery : [PLACEHOLDER_IMG]),
+        videoUrl,
         variants: asJson([{ id: "standard", name: "Standard", swatch: "#cbb48a" }]),
         specs: asJson([]),
         features: asJson([]),

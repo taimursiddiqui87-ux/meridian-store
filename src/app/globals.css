@@ -50,8 +50,16 @@
     @apply inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-luxe text-brass-600;
   }
 
+  /* Apple-style frosted surfaces */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl backdrop-saturate-150;
+  }
+  .glass-card {
+    @apply rounded-2xl bg-white/80 ring-1 ring-black/[0.06] backdrop-blur-xl;
+  }
+
   .btn {
-    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-300 ease-luxe disabled:pointer-events-none disabled:opacity-50 select-none;
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-all duration-300 ease-luxe disabled:pointer-events-none disabled:opacity-50 select-none active:scale-[0.97];
   }
   .btn-primary {
     @apply btn bg-ink px-8 py-4 text-[12.5px] uppercase tracking-wider2 text-paper hover:bg-ink-soft hover:shadow-lift;
@@ -80,7 +88,7 @@
     @apply mb-2 block text-[12px] uppercase tracking-wider2 text-ink-muted;
   }
   .field-input {
-    @apply w-full border border-stone-200 bg-white/70 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-400 focus:border-ink focus:bg-white;
+    @apply w-full rounded-xl border border-stone-200 bg-white/70 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-stone-400 focus:border-ink focus:bg-white focus:ring-4 focus:ring-ink/[0.06];
   }
 
   .hairline {

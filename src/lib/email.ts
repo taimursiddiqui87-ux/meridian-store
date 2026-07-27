@@ -11,6 +11,9 @@ type FullOrder = Order & { items: OrderItem[] };
 const methodLabel: Record<string, string> = {
   cod: "Cash on Delivery",
   card: "Credit / Debit Card",
+  stripe: "Stripe",
+  payoneer: "Payoneer",
+  fastpay: "FastPay",
   jazzcash: "JazzCash",
   easypaisa: "Easypaisa",
 };

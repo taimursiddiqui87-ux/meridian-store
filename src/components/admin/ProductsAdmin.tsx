@@ -3,7 +3,19 @@
 import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Pencil, Trash2, X, Package, DownloadCloud, AlertCircle } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  X,
+  Package,
+  DownloadCloud,
+  AlertCircle,
+  Film,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageHeader, Card, Pill } from "@/components/admin/AdminUI";
 import { ImageUploader } from "@/components/admin/ImageUploader";
@@ -20,7 +32,8 @@ export interface AdminRow {
   compareAt: number; // dollars (0 = none)
   stock: number;
   active: boolean;
-  image: string;
+  images: string[];
+  videoUrl: string;
   badge: string;
 }
 
@@ -41,7 +54,8 @@ const emptyRow: AdminRow = {
   compareAt: 0,
   stock: 0,
   active: true,
-  image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?auto=format&fit=crop&w=400&q=80",
+  images: [],
+  videoUrl: "",
   badge: "",
 };
 
@@ -93,7 +107,8 @@ export function ProductsAdmin({ initial, persisted }: { initial: AdminRow[]; per
         compareAtDollars: row.compareAt || null,
         stock: row.stock,
         active: row.active,
-        image: row.image,
+        images: row.images,
+        videoUrl: row.videoUrl || null,
         badge: row.badge || null,
       });
       if (!res.ok) {
@@ -188,9 +203,17 @@ export function ProductsAdmin({ initial, persisted }: { initial: AdminRow[]; per
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="relative h-11 w-9 shrink-0 overflow-hidden rounded bg-cream">
-                        {r.image && <Image src={r.image} alt="" fill sizes="36px" className="object-cover" />}
+                        {r.images[0] && (
+                          <Image src={r.images[0]} alt="" fill sizes="36px" className="object-cover" />
+                        )}
                       </div>
-                      <span className="font-medium text-ink">{r.name}</span>
+                      <span className="font-medium text-ink">
+                        {r.name}
+                        <span className="ml-2 text-[11px] font-normal text-stone-400">
+                          {r.images.length > 1 && `${r.images.length} photos`}
+                          {r.videoUrl && (r.images.length > 1 ? " · video" : "video")}
+                        </span>
+                      </span>
                     </div>
                   </td>
                   <td className="px-5 py-3 text-[13px] text-stone-500">{r.sku}</td>
@@ -272,7 +295,21 @@ function ProductDrawer({
   onSave: (r: AdminRow) => void;
 }) {
   const [form, setForm] = useState<AdminRow>(initial);
+  const [imageUrl, setImageUrl] = useState("");
   const set = (patch: Partial<AdminRow>) => setForm((f) => ({ ...f, ...patch }));
+
+  const addImage = (url: string) =>
+    setForm((f) => (f.images.length >= 8 ? f : { ...f, images: [...f.images, url.trim()] }));
+  const removeImage = (i: number) =>
+    setForm((f) => ({ ...f, images: f.images.filter((_, j) => j !== i) }));
+  const moveImage = (i: number, dir: number) =>
+    setForm((f) => {
+      const next = [...f.images];
+      const j = i + dir;
+      if (j < 0 || j >= next.length) return f;
+      [next[i], next[j]] = [next[j], next[i]];
+      return { ...f, images: next };
+    });
 
   return (
     <div className="fixed inset-0 z-50">
@@ -286,22 +323,141 @@ function ProductDrawer({
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-6">
+          {/* Gallery — multiple photos, first one is the main image */}
           <div>
-            <div className="flex items-center gap-4">
-              <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-cream">
-                {form.image && <Image src={form.image} alt="" fill sizes="64px" className="object-cover" />}
-              </div>
-              <div className="flex-1">
-                <label className="field-label">Image</label>
-                <input
-                  value={form.image}
-                  onChange={(e) => set({ image: e.target.value })}
-                  placeholder="…or paste an image URL"
-                  className="field-input"
-                />
-              </div>
+            <label className="field-label">
+              Photos
+              <span className="ml-2 normal-case text-stone-400">
+                {form.images.length}/8 · first photo is the main image
+              </span>
+            </label>
+
+            <div className="grid grid-cols-4 gap-2">
+              {form.images.map((src, i) => (
+                <div
+                  key={`${src}-${i}`}
+                  className="group/img relative aspect-[4/5] overflow-hidden rounded-lg bg-cream ring-1 ring-stone-200"
+                >
+                  <Image src={src} alt="" fill sizes="80px" className="object-cover" />
+                  {i === 0 && (
+                    <span className="absolute left-1 top-1 rounded bg-ink/85 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-paper">
+                      Main
+                    </span>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-center gap-0.5 bg-ink/70 p-1 opacity-0 transition-opacity group-hover/img:opacity-100">
+                    <button
+                      type="button"
+                      onClick={() => moveImage(i, -1)}
+                      disabled={i === 0}
+                      aria-label="Move left"
+                      className="grid h-5 w-5 place-items-center rounded text-paper hover:bg-white/20 disabled:opacity-30"
+                    >
+                      <ArrowLeft size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      aria-label="Remove photo"
+                      className="grid h-5 w-5 place-items-center rounded text-paper hover:bg-danger"
+                    >
+                      <Trash2 size={11} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveImage(i, 1)}
+                      disabled={i === form.images.length - 1}
+                      aria-label="Move right"
+                      className="grid h-5 w-5 place-items-center rounded text-paper hover:bg-white/20 disabled:opacity-30"
+                    >
+                      <ArrowRight size={11} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {form.images.length === 0 && (
+                <div className="col-span-4 grid h-20 place-items-center rounded-lg border border-dashed border-stone-300 text-[12px] text-stone-400">
+                  No photos yet
+                </div>
+              )}
             </div>
-            <ImageUploader folder="products" onUploaded={(url) => set({ image: url })} className="mt-3" />
+
+            {form.images.length < 8 && (
+              <>
+                <ImageUploader
+                  folder="products"
+                  label="Add photo from your device"
+                  onUploaded={(url) => addImage(url)}
+                  className="mt-3"
+                />
+                <div className="mt-2 flex gap-2">
+                  <input
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (imageUrl.trim()) {
+                          addImage(imageUrl);
+                          setImageUrl("");
+                        }
+                      }
+                    }}
+                    placeholder="…or paste an image URL"
+                    className="field-input flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (imageUrl.trim()) {
+                        addImage(imageUrl);
+                        setImageUrl("");
+                      }
+                    }}
+                    className="btn rounded-lg border border-stone-300 px-4 text-[12px] uppercase tracking-wider2 hover:border-ink"
+                  >
+                    Add
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Video */}
+          <div>
+            <label className="field-label">Product video (optional)</label>
+            {form.videoUrl ? (
+              <div className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3">
+                <Film size={18} className="shrink-0 text-brass-600" />
+                <span className="min-w-0 flex-1 truncate text-[12px] text-ink-muted">
+                  {form.videoUrl.split("/").pop()}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => set({ videoUrl: "" })}
+                  aria-label="Remove video"
+                  className="grid h-7 w-7 place-items-center rounded text-stone-500 hover:bg-danger/10 hover:text-danger"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <ImageUploader
+                  folder="product-videos"
+                  kind="video"
+                  onUploaded={(url) => set({ videoUrl: url })}
+                />
+                <input
+                  value={form.videoUrl}
+                  onChange={(e) => set({ videoUrl: e.target.value })}
+                  placeholder="…or paste an MP4 URL"
+                  className="field-input mt-2"
+                />
+              </>
+            )}
+            <p className="mt-1.5 text-[11px] text-stone-400">
+              MP4 or WebM, up to 100 MB. Shown first in the product gallery.
+            </p>
           </div>
 
           <div>

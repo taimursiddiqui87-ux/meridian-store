@@ -9,7 +9,15 @@ import { computeTotals } from "@/lib/pricing";
 import { validateCoupon } from "@/app/actions/coupons";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const METHODS = ["cod", "card", "jazzcash", "easypaisa"] as const;
+const METHODS = [
+  "cod",
+  "card",
+  "stripe",
+  "payoneer",
+  "fastpay",
+  "jazzcash",
+  "easypaisa",
+] as const;
 export type PaymentMethod = (typeof METHODS)[number];
 
 export interface CheckoutLine {

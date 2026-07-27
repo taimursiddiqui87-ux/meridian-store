@@ -22,6 +22,7 @@ import {
   Ruler,
   Recycle,
   Timer,
+  Play,
   type LucideIcon,
 } from "lucide-react";
 import type { Product } from "@/lib/types";
@@ -152,9 +153,30 @@ export function ProductDetail({
       />
 
       <div className="mt-6 grid gap-10 lg:grid-cols-2 lg:gap-16">
-        {/* Gallery */}
+        {/* Gallery — optional video first, then photos */}
         <div className="flex flex-col-reverse gap-4 sm:flex-row">
-          <div className="flex gap-3 sm:flex-col">
+          <div className="hide-scrollbar flex gap-3 overflow-x-auto sm:flex-col sm:overflow-visible">
+            {product.videoUrl && (
+              <button
+                onClick={() => setActiveImage(-1)}
+                aria-label="Play product video"
+                className={cn(
+                  "relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-ink transition-all sm:h-24 sm:w-20",
+                  activeImage === -1
+                    ? "ring-2 ring-ink ring-offset-2 ring-offset-paper"
+                    : "opacity-70 hover:opacity-100",
+                )}
+              >
+                {product.images[0] && (
+                  <Image src={product.images[0]} alt="" fill sizes="80px" className="object-cover opacity-55" />
+                )}
+                <span className="absolute inset-0 grid place-items-center">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-white/90 text-ink shadow-soft">
+                    <Play size={13} className="ml-0.5 fill-current" />
+                  </span>
+                </span>
+              </button>
+            )}
             {product.images.map((src, i) => (
               <button
                 key={i}
@@ -169,14 +191,27 @@ export function ProductDetail({
             ))}
           </div>
           <div className="relative aspect-[4/5] flex-1 overflow-hidden rounded-xl2 bg-cream">
-            <Image
-              src={product.images[activeImage]}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width:1024px) 100vw, 50vw"
-              className="object-cover"
-            />
+            {activeImage === -1 && product.videoUrl ? (
+              <video
+                key={product.videoUrl}
+                src={product.videoUrl}
+                controls
+                autoPlay
+                muted
+                playsInline
+                poster={product.images[0]}
+                className="h-full w-full bg-ink object-cover"
+              />
+            ) : (
+              <Image
+                src={product.images[Math.max(0, activeImage)] ?? product.images[0]}
+                alt={product.name}
+                fill
+                priority
+                sizes="(max-width:1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+            )}
             {onSale ? (
               <span className="absolute left-4 top-4 rounded-md bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-1.5 text-[11px] font-bold text-white">
                 {Math.round((1 - product.price / product.compareAtPrice!) * 100)}% OFF

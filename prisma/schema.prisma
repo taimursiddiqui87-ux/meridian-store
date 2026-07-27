@@ -89,6 +89,7 @@ model Product {
   shortDescription String   @default("")
   description      String   @default("")
   images           Json // string[]
+  videoUrl         String? // optional product video (mp4/webm)
   variants         Json // ProductVariant[]
   specs            Json // Spec[]
   features         Json // string[]
