@@ -195,7 +195,7 @@ export const getSiteConfig = unstable_cache(
       return DEFAULT_CONFIG;
     }
   },
-  ["site-config-v3"],
+  ["site-config-v4"],
   { tags: ["site-config"], revalidate: 3600 },
 );
 
