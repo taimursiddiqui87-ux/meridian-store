@@ -10,20 +10,18 @@ import {
   type ReactNode,
 } from "react";
 import type { SiteConfig } from "@/lib/settings";
+import { CURRENCY_META, formatMoney } from "@/lib/money";
 
 export type CurrencyConfig = SiteConfig["currency"];
 
-/** Display metadata per supported currency (prices are stored in USD cents). */
-export const CURRENCIES: Record<string, { symbol: string; label: string }> = {
-  USD: { symbol: "$", label: "US Dollar" },
-  PKR: { symbol: "Rs. ", label: "Pakistani Rupee" },
-  GBP: { symbol: "£", label: "British Pound" },
-  CAD: { symbol: "C$", label: "Canadian Dollar" },
-};
+/** Re-exported so existing imports keep working; defined once in lib/money. */
+export const CURRENCIES = CURRENCY_META;
 
 interface CurrencyContextValue {
   code: string;
   enabled: string[];
+  /** Units per 1 USD for the selected currency. */
+  rate: number;
   setCode: (code: string) => void;
   /** Formats USD cents in the shopper's selected display currency. */
   format: (cents: number) => string;
@@ -75,22 +73,12 @@ export function CurrencyProvider({
   );
 
   const rates = safe.rates;
-  const format = useCallback(
-    (cents: number) => {
-      const rate = rates[code] ?? 1;
-      const amount = (cents / 100) * rate;
-      const { symbol } = CURRENCIES[code] ?? CURRENCIES.USD;
-      return `${symbol}${new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
-        Math.round(amount),
-      )}`;
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [code, JSON.stringify(rates)],
-  );
+  const rate = rates[code] ?? 1;
+  const format = useCallback((cents: number) => formatMoney(cents, code, rate), [code, rate]);
 
   const value = useMemo(
-    () => ({ code, enabled, setCode, format }),
-    [code, enabled, setCode, format],
+    () => ({ code, enabled, rate, setCode, format }),
+    [code, enabled, rate, setCode, format],
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

@@ -20,6 +20,8 @@ const METHODS = [
 ] as const;
 export type PaymentMethod = (typeof METHODS)[number];
 
+const CURRENCY_CODES = ["USD", "PKR", "GBP", "CAD"];
+
 export interface CheckoutLine {
   productId: string;
   slug: string;
@@ -47,6 +49,9 @@ export interface CheckoutInput {
    */
   brand?: string;
   last4?: string;
+  /** Currency the shopper was browsing in, so the order and email match it. */
+  displayCurrency?: string;
+  displayRate?: number;
   lines: CheckoutLine[];
 }
 
@@ -155,6 +160,10 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
             ? `${input.brand ?? "Card"} ••••${input.last4} · ${orderNumber}`
             : null,
         currency: "usd",
+        displayCurrency: CURRENCY_CODES.includes(input.displayCurrency ?? "")
+          ? input.displayCurrency
+          : "USD",
+        displayRate: Number(input.displayRate) > 0 ? Number(input.displayRate) : 1,
         subtotal,
         discount,
         couponCode,

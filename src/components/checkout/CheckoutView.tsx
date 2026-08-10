@@ -91,7 +91,7 @@ function Shell({ storeName, children }: { storeName: string; children: React.Rea
 
 export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; storeName: string }) {
   const { lines, subtotal, count } = useCart();
-  const { format, code: currencyCode } = useCurrency();
+  const { format, code: currencyCode, rate } = useCurrency();
   const { applied, error: couponError, apply, remove: removeCoupon } = useAppliedCoupon(subtotal);
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -146,6 +146,8 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
         ...form,
         method,
         couponCode: applied?.code,
+        displayCurrency: currencyCode,
+        displayRate: rate,
         lines,
         ...(method === "card" ? cardSummary(card) : {}),
       });

@@ -1,5 +1,5 @@
 import { getAllOrders } from "@/lib/orders";
-import { formatPrice } from "@/lib/utils";
+import { formatOrderTotal, formatMoney } from "@/lib/money";
 import { OrdersAdmin, type OrderRow } from "@/components/admin/OrdersAdmin";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,9 @@ export default async function AdminOrdersPage() {
     email: o.email,
     product: o.items.map((i) => i.name).join(", ") || "—",
     items: o.items.reduce((n, i) => n + i.quantity, 0),
-    total: formatPrice(o.total),
+    // Shows "Rs. 2,780 ($10)" when the shopper browsed in another currency, so
+    // the courier knows exactly what to collect on delivery.
+    total: formatOrderTotal(o.total, o.displayCurrency, o.displayRate),
     status: cap(o.status),
     statusKey: o.status,
     date: new Date(o.createdAt).toLocaleString("en-US", {
@@ -40,7 +42,7 @@ export default async function AdminOrdersPage() {
       name: i.name,
       variant: i.variant,
       quantity: i.quantity,
-      price: formatPrice(i.price),
+      price: formatMoney(i.price, o.displayCurrency ?? "USD", o.displayRate ?? 1),
     })),
   }));
 

@@ -48,6 +48,8 @@ model Order {
   tax             Int         @default(0)
   total           Int
   paymentRef      String?     @unique // gateway transaction reference
+  displayCurrency String? // currency the shopper was browsing in (USD | PKR | GBP | CAD)
+  displayRate     Float? // units per 1 USD at the time of the order
   customerName    String?
   shippingAddress String?
   trackingNumber  String? // set when the order is dispatched

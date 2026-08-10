@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { getSiteConfigFresh } from "./settings";
 import type { Order, OrderItem } from "@prisma/client";
-import { formatPrice } from "./utils";
+import { formatMoney } from "./money";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://meridian-store-beige.vercel.app";
@@ -149,7 +149,7 @@ async function sendAdminNotification(order: FullOrder, name: string) {
     await resend.emails.send({
       from: fromAddress(name),
       to: adminEmail,
-      subject: `New order ${order.orderNumber} · ${formatPrice(order.total)} · ${methodLabel[order.paymentMethod] ?? order.paymentMethod}`,
+      subject: `New order ${order.orderNumber} · ${formatMoney(order.total, order.displayCurrency || "USD", order.displayRate || 1)} · ${methodLabel[order.paymentMethod] ?? order.paymentMethod}`,
       html: renderOrderEmail(order, "admin", name),
     });
   } catch (e) {
@@ -159,6 +159,10 @@ async function sendAdminNotification(order: FullOrder, name: string) {
 
 function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand: string) {
   const isAdmin = variant === "admin";
+  // Show the amounts in whatever currency the shopper was browsing in.
+  const cur = order.displayCurrency || "USD";
+  const rate = order.displayRate || 1;
+  const fmt = (cents: number) => formatMoney(cents, cur, rate);
   const method = methodLabel[order.paymentMethod] ?? order.paymentMethod;
 
   const rows = order.items
@@ -170,7 +174,7 @@ function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand
           <div style="font-size:12px;color:#8C8069;">${i.variant} · Qty ${i.quantity}</div>
         </td>
         <td align="right" style="padding:12px 0;border-bottom:1px solid #EEEAE2;font-size:14px;color:#17130F;">
-          ${formatPrice(i.price * i.quantity)}
+          ${fmt(i.price * i.quantity)}
         </td>
       </tr>`,
     )
@@ -211,25 +215,25 @@ function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand
           ${rows}
           <tr>
             <td style="padding:16px 0 4px;font-size:13px;color:#8C8069;">Subtotal</td>
-            <td align="right" style="padding:16px 0 4px;font-size:13px;color:#17130F;">${formatPrice(order.subtotal)}</td>
+            <td align="right" style="padding:16px 0 4px;font-size:13px;color:#17130F;">${fmt(order.subtotal)}</td>
           </tr>
           ${
             order.discount > 0
-              ? `<tr><td style="padding:4px 0;font-size:13px;color:#3F7D5A;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</td><td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">−${formatPrice(order.discount)}</td></tr>`
+              ? `<tr><td style="padding:4px 0;font-size:13px;color:#3F7D5A;">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</td><td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">−${fmt(order.discount)}</td></tr>`
               : ""
           }
           <tr>
             <td style="padding:4px 0;font-size:13px;color:#8C8069;">Shipping</td>
-            <td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">${order.shipping === 0 ? "Free" : formatPrice(order.shipping)}</td>
+            <td align="right" style="padding:4px 0;font-size:13px;color:#3F7D5A;">${order.shipping === 0 ? "Free" : fmt(order.shipping)}</td>
           </tr>
           ${
             order.tax > 0
-              ? `<tr><td style="padding:4px 0;font-size:13px;color:#8C8069;">Tax</td><td align="right" style="padding:4px 0;font-size:13px;color:#17130F;">${formatPrice(order.tax)}</td></tr>`
+              ? `<tr><td style="padding:4px 0;font-size:13px;color:#8C8069;">Tax</td><td align="right" style="padding:4px 0;font-size:13px;color:#17130F;">${fmt(order.tax)}</td></tr>`
               : ""
           }
           <tr>
             <td style="padding:12px 0 0;font-family:Georgia,serif;font-size:18px;color:#17130F;border-top:1px solid #DDD6C9;">Total</td>
-            <td align="right" style="padding:12px 0 0;font-family:Georgia,serif;font-size:18px;color:#17130F;border-top:1px solid #DDD6C9;">${formatPrice(order.total)}</td>
+            <td align="right" style="padding:12px 0 0;font-family:Georgia,serif;font-size:18px;color:#17130F;border-top:1px solid #DDD6C9;">${fmt(order.total)}</td>
           </tr>
         </table>
         ${detailsBlock}
