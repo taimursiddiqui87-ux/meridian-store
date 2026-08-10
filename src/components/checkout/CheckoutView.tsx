@@ -20,15 +20,22 @@ import { computeTotals, type CheckoutRules } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { placeOrder } from "@/app/actions/checkout";
 import { PaymentMark } from "@/components/checkout/PaymentMarks";
+import { CardFields } from "@/components/checkout/CardFields";
+import { validateCard, cardSummary, type CardInput } from "@/lib/card";
 
 const methods = [
+  {
+    id: "card",
+    label: "Debit / Credit Card",
+    desc: "Visa · Mastercard · UnionPay · Amex",
+    live: false,
+  },
   {
     id: "cod",
     label: "Cash on Delivery (COD)",
     desc: "Pay in cash to the courier when you receive the parcel at your door-step.",
     live: true,
   },
-  { id: "card", label: "Debit / Credit Card", desc: "Visa · Mastercard", live: false },
   { id: "stripe", label: "Stripe", desc: "Cards, Apple Pay & Google Pay", live: false },
   { id: "payoneer", label: "Payoneer", desc: "International payments", live: false },
   { id: "fastpay", label: "FastPay", desc: "Fast local bank transfer", live: false },
@@ -90,7 +97,9 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [method, setMethod] = useState("cod");
+  const [method, setMethod] = useState("card");
+  const [card, setCard] = useState<CardInput>({ number: "", name: "", expiry: "", cvc: "" });
+  const [showCardErrors, setShowCardErrors] = useState(false);
   const [code, setCode] = useState("");
   const [applying, setApplying] = useState(false);
   const [form, setForm] = useState({
@@ -117,12 +126,29 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
     setApplying(false);
   };
 
+  const cardErrors = validateCard(card);
+  const cardIncomplete = method === "card" && Object.keys(cardErrors).length > 0;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Card details are checked in the browser; only brand + last4 travel onward.
+    if (cardIncomplete) {
+      setShowCardErrors(true);
+      setError("Please check your card details.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const res = await placeOrder({ ...form, method, couponCode: applied?.code, lines });
+      const res = await placeOrder({
+        ...form,
+        method,
+        couponCode: applied?.code,
+        lines,
+        ...(method === "card" ? cardSummary(card) : {}),
+      });
       if (!res.ok || !res.orderId) {
         setError(res.error ?? "Could not place your order.");
         setLoading(false);
@@ -296,12 +322,12 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
                             <p className="text-[13px] leading-relaxed text-ink-soft">{m.desc}</p>
                           )}
                           {m.id === "card" && (
-                            <div className="grid grid-cols-2 gap-3">
-                              <input placeholder="Card number" className="field-input col-span-2 rounded-lg" inputMode="numeric" />
-                              <input placeholder="Name on card" className="field-input col-span-2 rounded-lg" />
-                              <input placeholder="MM / YY" className="field-input rounded-lg" inputMode="numeric" />
-                              <input placeholder="CVC" className="field-input rounded-lg" inputMode="numeric" />
-                            </div>
+                            <CardFields
+                              value={card}
+                              onChange={setCard}
+                              errors={cardErrors}
+                              showErrors={showCardErrors}
+                            />
                           )}
                           {m.id === "stripe" && (
                             <p className="text-[13px] leading-relaxed text-ink-soft">

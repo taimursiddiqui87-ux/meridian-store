@@ -41,6 +41,12 @@ export interface CheckoutInput {
   country: string;
   method: string;
   couponCode?: string;
+  /**
+   * Card identification only — never the full number. A live gateway will
+   * replace these with its own token/transaction id.
+   */
+  brand?: string;
+  last4?: string;
   lines: CheckoutLine[];
 }
 
@@ -141,6 +147,13 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
         userId,
         status,
         paymentMethod: method,
+        // Card orders record "Visa ••••4242 · MER-123456" — readable, unique,
+        // and free of any sensitive data. A live gateway overwrites this with
+        // its own transaction reference.
+        paymentRef:
+          method === "card" && input.last4
+            ? `${input.brand ?? "Card"} ••••${input.last4} · ${orderNumber}`
+            : null,
         currency: "usd",
         subtotal,
         discount,
