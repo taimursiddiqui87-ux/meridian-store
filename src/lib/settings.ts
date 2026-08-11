@@ -59,6 +59,10 @@ export interface SiteConfig {
     enabled: string[]; // subset of USD | PKR | GBP | CAD
     rates: Record<string, number>; // units per 1 USD (USD is always 1)
   };
+  payments: {
+    /** Methods offered at checkout, in order. Turn extras on when they're ready. */
+    methods: string[];
+  };
 }
 
 export const DEFAULT_CONFIG: SiteConfig = {
@@ -147,6 +151,9 @@ export const DEFAULT_CONFIG: SiteConfig = {
     enabled: ["USD", "PKR", "GBP", "CAD"],
     rates: { USD: 1, PKR: 278, GBP: 0.79, CAD: 1.37 },
   },
+  payments: {
+    methods: ["card", "cod"],
+  },
 };
 
 /** Deep-merge stored config over the defaults so new fields always resolve. */
@@ -177,6 +184,9 @@ export function mergeConfig(stored: Partial<SiteConfig> | null | undefined): Sit
       enabled: s.currency?.enabled?.length ? s.currency.enabled : DEFAULT_CONFIG.currency.enabled,
       rates: { ...DEFAULT_CONFIG.currency.rates, ...(s.currency?.rates ?? {}) },
     },
+    payments: {
+      methods: s.payments?.methods?.length ? s.payments.methods : DEFAULT_CONFIG.payments.methods,
+    },
   };
 }
 
@@ -195,7 +205,7 @@ export const getSiteConfig = unstable_cache(
       return DEFAULT_CONFIG;
     }
   },
-  ["site-config-v4"],
+  ["site-config-v5"],
   { tags: ["site-config"], revalidate: 3600 },
 );
 

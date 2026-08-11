@@ -78,6 +78,14 @@ export async function saveCurrency(currency: SiteConfig["currency"]) {
   });
 }
 
+const PAYMENT_METHODS = ["card", "cod", "stripe", "payoneer", "fastpay", "jazzcash", "easypaisa"];
+
+export async function savePayments(payments: SiteConfig["payments"]) {
+  await guard();
+  const methods = PAYMENT_METHODS.filter((m) => payments.methods?.includes(m));
+  await persist({ payments: { methods: methods.length ? methods : ["cod"] } });
+}
+
 export async function saveCheckout(checkout: SiteConfig["checkout"]) {
   await guard();
   await persist({

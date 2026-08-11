@@ -77,6 +77,18 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     ? (input.method as PaymentMethod)
     : "cod";
 
+  // Honour the store's enabled methods server-side too, so a disabled option
+  // can't be submitted by editing the page. If settings are unreachable we let
+  // the order through rather than blocking checkout.
+  try {
+    const { payments } = await getSiteConfig();
+    if (payments.methods.length && !payments.methods.includes(method)) {
+      return { ok: false, error: "That payment method isn't available right now." };
+    }
+  } catch {
+    /* settings unavailable — don't block the sale */
+  }
+
   // Inventory check — only enforced for catalog products that exist in the DB
   // (items served from the static seed fallback are treated as always available).
   let dbStock = new Map<string, { name: string; stock: number }>();
@@ -136,9 +148,10 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const { shipping, tax, total } = computeTotals(subtotal, rules, discount);
   const orderNumber = "MER-" + Date.now().toString().slice(-6);
 
-  // COD is settled on delivery (unpaid); the gateway methods run in demo mode
-  // (marked paid, no real charge) until live merchant credentials are wired in.
-  const status = method === "cod" ? "pending" : "paid";
+  // Nothing is marked paid until a payment gateway actually confirms it. COD is
+  // settled on delivery, and the online methods stay pending until merchant
+  // credentials are connected — so staff never ship against a phantom payment.
+  const status = "pending";
   const shippingAddress = [input.address, input.city, input.postalCode, input.country]
     .map((s) => s?.trim())
     .filter(Boolean)

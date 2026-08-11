@@ -23,7 +23,7 @@ import { PaymentMark } from "@/components/checkout/PaymentMarks";
 import { CardFields } from "@/components/checkout/CardFields";
 import { validateCard, cardSummary, type CardInput } from "@/lib/card";
 
-const methods = [
+const ALL_METHODS = [
   {
     id: "card",
     label: "Debit / Credit Card",
@@ -89,7 +89,17 @@ function Shell({ storeName, children }: { storeName: string; children: React.Rea
   );
 }
 
-export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; storeName: string }) {
+export function CheckoutView({
+  rules,
+  storeName,
+  enabledMethods,
+}: {
+  rules: CheckoutRules;
+  storeName: string;
+  enabledMethods: string[];
+}) {
+  // Only the methods the store has switched on, in the order defined above.
+  const methods = ALL_METHODS.filter((m) => enabledMethods.includes(m.id));
   const { lines, subtotal, count } = useCart();
   const { format, code: currencyCode, rate } = useCurrency();
   const { applied, error: couponError, apply, remove: removeCoupon } = useAppliedCoupon(subtotal);
@@ -97,7 +107,7 @@ export function CheckoutView({ rules, storeName }: { rules: CheckoutRules; store
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [method, setMethod] = useState("card");
+  const [method, setMethod] = useState(() => methods[0]?.id ?? "cod");
   const [card, setCard] = useState<CardInput>({ number: "", name: "", expiry: "", cvc: "" });
   const [showCardErrors, setShowCardErrors] = useState(false);
   const [code, setCode] = useState("");

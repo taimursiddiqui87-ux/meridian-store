@@ -15,6 +15,7 @@ import {
   saveCheckout,
   saveSale,
   saveCurrency,
+  savePayments,
 } from "@/app/actions/settings";
 
 type CatalogItem = { slug: string; name: string; category: string; image: string };
@@ -27,6 +28,16 @@ const tabs = [
   { id: "checkout", label: "Checkout", icon: Truck },
   { id: "announce", label: "Announcements", icon: Megaphone },
 ] as const;
+
+const PAYMENT_OPTIONS = [
+  { id: "card", label: "Debit / Credit Card", note: "Visa · Mastercard · UnionPay · Amex", live: false },
+  { id: "cod", label: "Cash on Delivery", note: "Collected by the courier", live: true },
+  { id: "stripe", label: "Stripe", note: "Cards, Apple Pay & Google Pay", live: false },
+  { id: "payoneer", label: "Payoneer", note: "International payments", live: false },
+  { id: "fastpay", label: "FastPay", note: "Fast local bank transfer", live: false },
+  { id: "jazzcash", label: "JazzCash", note: "Mobile wallet & cards", live: false },
+  { id: "easypaisa", label: "Easypaisa", note: "Mobile wallet & cards", live: false },
+];
 
 const homeSectionKeys: { key: keyof SiteConfig["home"]; label: string }[] = [
   { key: "featured", label: "Featured" },
@@ -412,6 +423,53 @@ export function SettingsAdmin({
             </Card>
           )}
 
+          {/* PAYMENT METHODS */}
+          {tab === "checkout" && (
+            <Card>
+              <CardHead title="Payment methods" />
+              <div className="space-y-3 p-5">
+                <p className="text-[13px] text-ink-muted">
+                  Tick the methods customers can choose at checkout. Turn the others on once the
+                  merchant accounts are approved.
+                </p>
+                {PAYMENT_OPTIONS.map((opt) => {
+                  const on = cfg.payments.methods.includes(opt.id);
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => togglePayment(opt.id)}
+                      className={cn(
+                        "flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors",
+                        on ? "border-ink bg-cream/50" : "border-stone-200 hover:border-stone-300",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "grid h-[18px] w-[18px] shrink-0 place-items-center rounded border",
+                          on ? "border-ink bg-ink text-paper" : "border-stone-300",
+                        )}
+                      >
+                        {on && <Check size={12} strokeWidth={3} />}
+                      </span>
+                      <span className="flex-1">
+                        <span className="block text-[13.5px] font-medium text-ink">{opt.label}</span>
+                        <span className="block text-[12px] text-ink-muted">{opt.note}</span>
+                      </span>
+                      {opt.live && (
+                        <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">
+                          Live
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="flex justify-end border-t border-stone-100 px-5 py-4">
+                <SaveButton label="payments" onClick={() => run("payments", () => savePayments(cfg.payments))} />
+              </div>
+            </Card>
+          )}
+
           {/* ANNOUNCEMENTS */}
           {tab === "announce" && (
             <Card>
@@ -470,6 +528,12 @@ export function SettingsAdmin({
   }
   function setSale<K extends keyof SiteConfig["sale"]>(k: K, v: SiteConfig["sale"][K]) {
     setCfg({ ...cfg, sale: { ...cfg.sale, [k]: v } });
+    setSaved(null);
+  }
+  function togglePayment(id: string) {
+    const cur = cfg.payments.methods;
+    const next = cur.includes(id) ? cur.filter((m) => m !== id) : [...cur, id];
+    setCfg({ ...cfg, payments: { methods: next } });
     setSaved(null);
   }
   function setCurrencyCfg(patch: Partial<SiteConfig["currency"]>) {
