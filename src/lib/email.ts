@@ -42,7 +42,39 @@ const methodLabel: Record<string, string> = {
 /** Sends the customer confirmation AND the admin new-order notification. */
 export async function sendOrderEmails(order: FullOrder) {
   const name = await storeName();
-  await Promise.allSettled([sendCustomerConfirmation(order, name), sendAdminNotification(order, name)]);
+  const manual = await manualPaymentBlock(order);
+  await Promise.allSettled([
+    sendCustomerConfirmation(order, name, manual),
+    sendAdminNotification(order, name),
+  ]);
+}
+
+/** Wallet transfer details for the customer email, if the store has them set. */
+async function manualPaymentBlock(order: FullOrder): Promise<string> {
+  try {
+    const { payments } = await getSiteConfigFresh();
+    const m = payments.manual;
+    const accounts = m.accounts.filter((a) => a.number.trim());
+    if (!m.enabled || accounts.length === 0) return "";
+    const rows = accounts
+      .map(
+        (a) => `
+        <tr>
+          <td style="padding:8px 0;font-size:13px;color:#4A4237;">${a.provider}${a.accountName ? ` · ${a.accountName}` : ""}</td>
+          <td align="right" style="padding:8px 0;font-size:15px;font-weight:700;color:#17130F;">${a.number}</td>
+        </tr>`,
+      )
+      .join("");
+    return `
+      <div style="margin-top:24px;padding:16px;border:1px solid #E4CDA0;background:#FAF5EA;">
+        <div style="font-family:Georgia,serif;font-size:17px;color:#17130F;">${m.heading}</div>
+        <p style="font-size:13px;color:#4A4237;margin:6px 0 10px;">${m.instructions}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+        <p style="font-size:12px;color:#8C8069;margin:10px 0 0;">Quote order <strong>${order.orderNumber}</strong> with your screenshot.</p>
+      </div>`;
+  } catch {
+    return "";
+  }
 }
 
 /** Emails a customer's contact-form message to the store admin. Returns true if dispatched. */
@@ -117,7 +149,7 @@ export async function sendPasswordResetEmail(to: string, link: string): Promise<
   }
 }
 
-async function sendCustomerConfirmation(order: FullOrder, name: string) {
+async function sendCustomerConfirmation(order: FullOrder, name: string, manualBlock = "") {
   if (!resend) {
     console.log("[email] RESEND_API_KEY not set — skipping customer email for", order.orderNumber);
     return;
@@ -128,7 +160,7 @@ async function sendCustomerConfirmation(order: FullOrder, name: string) {
       from: fromAddress(name),
       to: order.email,
       subject: `Your ${name} order ${order.orderNumber} is confirmed`,
-      html: renderOrderEmail(order, "customer", name),
+      html: renderOrderEmail(order, "customer", name, manualBlock),
     });
   } catch (e) {
     console.error("[email] customer confirmation failed", e);
@@ -157,7 +189,7 @@ async function sendAdminNotification(order: FullOrder, name: string) {
   }
 }
 
-function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand: string) {
+function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand: string, manualBlock = "") {
   const isAdmin = variant === "admin";
   // Show the amounts in whatever currency the shopper was browsing in.
   const cur = order.displayCurrency || "USD";
@@ -237,6 +269,7 @@ function renderOrderEmail(order: FullOrder, variant: "customer" | "admin", brand
           </tr>
         </table>
         ${detailsBlock}
+        ${isAdmin ? "" : manualBlock}
       </div>
       <div style="background:#17130F;padding:20px 28px;text-align:center;">
         <p style="font-size:12px;color:#8C8069;margin:0;">${footer}</p>

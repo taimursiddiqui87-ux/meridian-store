@@ -83,7 +83,22 @@ const PAYMENT_METHODS = ["card", "cod", "stripe", "payoneer", "fastpay", "jazzca
 export async function savePayments(payments: SiteConfig["payments"]) {
   await guard();
   const methods = PAYMENT_METHODS.filter((m) => payments.methods?.includes(m));
-  await persist({ payments: { methods: methods.length ? methods : ["cod"] } });
+  const manual = payments.manual;
+  await persist({
+    payments: {
+      methods: methods.length ? methods : ["cod"],
+      manual: {
+        enabled: !!manual?.enabled,
+        heading: manual?.heading?.trim() || "Prefer to pay by Easypaisa or JazzCash?",
+        instructions: manual?.instructions?.trim() || "",
+        accounts: (manual?.accounts ?? []).map((a) => ({
+          provider: a.provider?.trim() || "",
+          accountName: a.accountName?.trim() || "",
+          number: a.number?.trim() || "",
+        })),
+      },
+    },
+  });
 }
 
 export async function saveCheckout(checkout: SiteConfig["checkout"]) {

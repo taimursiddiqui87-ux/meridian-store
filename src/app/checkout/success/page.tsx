@@ -3,8 +3,10 @@ import Image from "next/image";
 import { CheckCircle2, Mail, Banknote } from "lucide-react";
 import type { Order, OrderItem } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { formatPrice } from "@/lib/utils";
+import { getSiteConfig } from "@/lib/settings";
+import { formatMoney } from "@/lib/money";
 import { ClearCart } from "@/components/cart/ClearCart";
+import { ManualPaymentPanel } from "@/components/checkout/ManualPaymentPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,10 @@ export default async function CheckoutSuccessPage({
     }
   }
 
+  const { payments, store } = await getSiteConfig();
+  // Show the order in whatever currency the shopper was browsing in.
+  const fmt = (cents: number) =>
+    formatMoney(cents, order?.displayCurrency ?? "USD", order?.displayRate ?? 1);
   const isCod = order?.paymentMethod === "cod";
 
   return (
@@ -54,10 +60,17 @@ export default async function CheckoutSuccessPage({
         {isCod && order && (
           <div className="mt-6 flex items-center justify-center gap-2 border border-brass-200 bg-brass-50 px-5 py-4 text-sm text-ink-soft">
             <Banknote size={18} className="text-brass-600" />
-            Please keep <strong className="text-ink">{formatPrice(order.total)}</strong> ready — you’ll
+            Please keep <strong className="text-ink">{fmt(order.total)}</strong> ready — you’ll
             pay in cash when your order arrives.
           </div>
         )}
+
+        <ManualPaymentPanel
+          manual={payments.manual}
+          whatsapp={store.whatsapp}
+          orderNumber={order?.orderNumber}
+          className="mt-6 text-left"
+        />
 
         <div className="mt-4 flex items-center justify-center gap-2 border-y border-stone-200 py-4 text-sm text-ink-soft">
           <Mail size={17} className="text-brass-600" />
@@ -77,13 +90,13 @@ export default async function CheckoutSuccessPage({
                     <p className="font-serif text-lg">{item.name}</p>
                     <p className="text-[12px] text-stone-400">{item.variant} · Qty {item.quantity}</p>
                   </div>
-                  <span className="text-sm tabular-nums">{formatPrice(item.price * item.quantity)}</span>
+                  <span className="text-sm tabular-nums">{fmt(item.price * item.quantity)}</span>
                 </li>
               ))}
             </ul>
             <div className="flex items-center justify-between border-t border-stone-200 px-4 py-4">
               <span className="text-[13px] uppercase tracking-wider2 text-ink-muted">Total</span>
-              <span className="font-serif text-2xl tabular-nums">{formatPrice(order.total)}</span>
+              <span className="font-serif text-2xl tabular-nums">{fmt(order.total)}</span>
             </div>
           </div>
         )}

@@ -21,7 +21,9 @@ import { cn } from "@/lib/utils";
 import { placeOrder } from "@/app/actions/checkout";
 import { PaymentMark } from "@/components/checkout/PaymentMarks";
 import { CardFields } from "@/components/checkout/CardFields";
+import { ManualPaymentPanel } from "@/components/checkout/ManualPaymentPanel";
 import { validateCard, cardSummary, type CardInput } from "@/lib/card";
+import type { SiteConfig } from "@/lib/settings";
 
 const ALL_METHODS = [
   {
@@ -93,10 +95,14 @@ export function CheckoutView({
   rules,
   storeName,
   enabledMethods,
+  manual,
+  whatsapp,
 }: {
   rules: CheckoutRules;
   storeName: string;
   enabledMethods: string[];
+  manual: SiteConfig["payments"]["manual"];
+  whatsapp: string;
 }) {
   // Only the methods the store has switched on, in the order defined above.
   const methods = ALL_METHODS.filter((m) => enabledMethods.includes(m.id));
@@ -373,6 +379,8 @@ export function CheckoutView({
                 })}
               </div>
             </section>
+
+            <ManualPaymentPanel manual={manual} whatsapp={whatsapp} />
 
             <button
               type="submit"

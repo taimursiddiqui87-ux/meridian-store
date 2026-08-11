@@ -470,6 +470,83 @@ export function SettingsAdmin({
             </Card>
           )}
 
+          {/* MANUAL WALLET TRANSFER (Easypaisa / JazzCash) */}
+          {tab === "checkout" && (
+            <Card>
+              <CardHead
+                title="Easypaisa / JazzCash transfer"
+                action={
+                  <button
+                    onClick={() => setManual({ enabled: !cfg.payments.manual.enabled })}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium",
+                      cfg.payments.manual.enabled
+                        ? "bg-success/10 text-success"
+                        : "bg-stone-100 text-stone-500",
+                    )}
+                  >
+                    {cfg.payments.manual.enabled ? <Eye size={13} /> : <EyeOff size={13} />}
+                    {cfg.payments.manual.enabled ? "Shown" : "Hidden"}
+                  </button>
+                }
+              />
+              <div className="space-y-4 p-5">
+                <p className="text-[13px] text-ink-muted">
+                  Shown at checkout, on the order-confirmation page and in the customer&apos;s email.
+                  Customers transfer the total and send you the screenshot. Leave a number blank to
+                  hide that account.
+                </p>
+                <Field label="Heading">
+                  <input
+                    className="field-input"
+                    value={cfg.payments.manual.heading}
+                    onChange={(e) => setManual({ heading: e.target.value })}
+                  />
+                </Field>
+                <Field label="Instructions">
+                  <textarea
+                    rows={3}
+                    className="field-input resize-none"
+                    value={cfg.payments.manual.instructions}
+                    onChange={(e) => setManual({ instructions: e.target.value })}
+                  />
+                </Field>
+                <div className="space-y-3">
+                  {cfg.payments.manual.accounts.map((acc, i) => (
+                    <div key={i} className="grid gap-3 rounded-lg border border-stone-200 p-3 sm:grid-cols-3">
+                      <Field label="Provider">
+                        <input
+                          className="field-input"
+                          value={acc.provider}
+                          onChange={(e) => setAccount(i, { provider: e.target.value })}
+                        />
+                      </Field>
+                      <Field label="Account title">
+                        <input
+                          className="field-input"
+                          placeholder="Name on the account"
+                          value={acc.accountName}
+                          onChange={(e) => setAccount(i, { accountName: e.target.value })}
+                        />
+                      </Field>
+                      <Field label="Account number">
+                        <input
+                          className="field-input"
+                          placeholder="03xx-xxxxxxx"
+                          value={acc.number}
+                          onChange={(e) => setAccount(i, { number: e.target.value })}
+                        />
+                      </Field>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end border-t border-stone-100 px-5 py-4">
+                <SaveButton label="manual" onClick={() => run("manual", () => savePayments(cfg.payments))} />
+              </div>
+            </Card>
+          )}
+
           {/* ANNOUNCEMENTS */}
           {tab === "announce" && (
             <Card>
@@ -530,10 +607,18 @@ export function SettingsAdmin({
     setCfg({ ...cfg, sale: { ...cfg.sale, [k]: v } });
     setSaved(null);
   }
+  function setManual(patch: Partial<SiteConfig["payments"]["manual"]>) {
+    setCfg({ ...cfg, payments: { ...cfg.payments, manual: { ...cfg.payments.manual, ...patch } } });
+    setSaved(null);
+  }
+  function setAccount(i: number, patch: Partial<SiteConfig["payments"]["manual"]["accounts"][number]>) {
+    const accounts = cfg.payments.manual.accounts.map((a, j) => (j === i ? { ...a, ...patch } : a));
+    setManual({ accounts });
+  }
   function togglePayment(id: string) {
     const cur = cfg.payments.methods;
     const next = cur.includes(id) ? cur.filter((m) => m !== id) : [...cur, id];
-    setCfg({ ...cfg, payments: { methods: next } });
+    setCfg({ ...cfg, payments: { ...cfg.payments, methods: next } });
     setSaved(null);
   }
   function setCurrencyCfg(patch: Partial<SiteConfig["currency"]>) {

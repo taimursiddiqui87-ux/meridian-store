@@ -62,6 +62,16 @@ export interface SiteConfig {
   payments: {
     /** Methods offered at checkout, in order. Turn extras on when they're ready. */
     methods: string[];
+    /**
+     * Pay-by-wallet details shown to shoppers who'd rather transfer manually
+     * (Easypaisa / JazzCash) and send proof of payment.
+     */
+    manual: {
+      enabled: boolean;
+      heading: string;
+      instructions: string;
+      accounts: { provider: string; accountName: string; number: string }[];
+    };
   };
 }
 
@@ -152,7 +162,17 @@ export const DEFAULT_CONFIG: SiteConfig = {
     rates: { USD: 1, PKR: 278, GBP: 0.79, CAD: 1.37 },
   },
   payments: {
-    methods: ["card", "cod"],
+    methods: ["cod"],
+    manual: {
+      enabled: true,
+      heading: "Prefer to pay by Easypaisa or JazzCash?",
+      instructions:
+        "Transfer the order total to one of the accounts below, then send us the payment screenshot on WhatsApp with your order number. We'll confirm and dispatch straight away.",
+      accounts: [
+        { provider: "Easypaisa", accountName: "", number: "" },
+        { provider: "JazzCash", accountName: "", number: "" },
+      ],
+    },
   },
 };
 
@@ -186,6 +206,13 @@ export function mergeConfig(stored: Partial<SiteConfig> | null | undefined): Sit
     },
     payments: {
       methods: s.payments?.methods?.length ? s.payments.methods : DEFAULT_CONFIG.payments.methods,
+      manual: {
+        ...DEFAULT_CONFIG.payments.manual,
+        ...(s.payments?.manual ?? {}),
+        accounts: s.payments?.manual?.accounts?.length
+          ? s.payments.manual.accounts
+          : DEFAULT_CONFIG.payments.manual.accounts,
+      },
     },
   };
 }
@@ -205,7 +232,7 @@ export const getSiteConfig = unstable_cache(
       return DEFAULT_CONFIG;
     }
   },
-  ["site-config-v5"],
+  ["site-config-v6"],
   { tags: ["site-config"], revalidate: 3600 },
 );
 
