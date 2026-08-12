@@ -34,3 +34,6 @@ next-env.d.ts
 !.env.example
 
 .env*
+
+# cPanel deployment bundle (built with npm run build:cpanel)
+/deploy
