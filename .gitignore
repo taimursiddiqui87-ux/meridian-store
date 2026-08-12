@@ -37,3 +37,4 @@ next-env.d.ts
 
 # cPanel deployment bundle (built with npm run build:cpanel)
 /deploy
+zamirastore-deploy.zip
