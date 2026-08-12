@@ -3,6 +3,10 @@
 
 generator client {
   provider = "prisma-client-js"
+  // "native" covers local dev. The Linux targets are needed because the cPanel
+  // bundle is built on Windows but runs on a Linux server — without them every
+  // database call fails with "query engine for current platform not found".
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "rhel-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
