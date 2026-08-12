@@ -232,7 +232,7 @@ export const getSiteConfig = unstable_cache(
       return DEFAULT_CONFIG;
     }
   },
-  ["site-config-v7"],
+  ["site-config-v8"],
   { tags: ["site-config"], revalidate: 3600 },
 );
 
