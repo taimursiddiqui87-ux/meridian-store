@@ -78,11 +78,16 @@ export async function saveCurrency(currency: SiteConfig["currency"]) {
   });
 }
 
-const PAYMENT_METHODS = ["card", "cod", "stripe", "payoneer", "fastpay", "jazzcash", "easypaisa"];
+/**
+ * Methods that can actually collect money today. The rest need a merchant
+ * gateway account, so they're not selectable until one is connected — add the
+ * id here at the same time the integration is wired up.
+ */
+const AVAILABLE_METHODS = ["cod"];
 
 export async function savePayments(payments: SiteConfig["payments"]) {
   await guard();
-  const methods = PAYMENT_METHODS.filter((m) => payments.methods?.includes(m));
+  const methods = AVAILABLE_METHODS.filter((m) => payments.methods?.includes(m));
   const manual = payments.manual;
   await persist({
     payments: {

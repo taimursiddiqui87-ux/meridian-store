@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Store, LayoutGrid, FileText, Megaphone, Truck, BadgePercent, Check, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Store, LayoutGrid, FileText, Megaphone, Truck, BadgePercent, Check, Plus, Trash2, Eye, EyeOff, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageHeader, Card, CardHead } from "@/components/admin/AdminUI";
 import type { SiteConfig, HomeSection } from "@/lib/settings";
@@ -29,14 +29,18 @@ const tabs = [
   { id: "announce", label: "Announcements", icon: Megaphone },
 ] as const;
 
+/**
+ * `available: false` = no merchant account connected yet, so the option can't
+ * take money and isn't selectable. Flip it when the gateway is wired up.
+ */
 const PAYMENT_OPTIONS = [
-  { id: "card", label: "Debit / Credit Card", note: "Visa · Mastercard · UnionPay · Amex", live: false },
-  { id: "cod", label: "Cash on Delivery", note: "Collected by the courier", live: true },
-  { id: "stripe", label: "Stripe", note: "Cards, Apple Pay & Google Pay", live: false },
-  { id: "payoneer", label: "Payoneer", note: "International payments", live: false },
-  { id: "fastpay", label: "FastPay", note: "Fast local bank transfer", live: false },
-  { id: "jazzcash", label: "JazzCash", note: "Mobile wallet & cards", live: false },
-  { id: "easypaisa", label: "Easypaisa", note: "Mobile wallet & cards", live: false },
+  { id: "cod", label: "Cash on Delivery", note: "Collected by the courier", available: true },
+  { id: "card", label: "Debit / Credit Card", note: "Visa · Mastercard · UnionPay · Amex", available: false },
+  { id: "stripe", label: "Stripe", note: "Cards, Apple Pay & Google Pay", available: false },
+  { id: "payoneer", label: "Payoneer", note: "International payments", available: false },
+  { id: "fastpay", label: "FastPay", note: "Fast local bank transfer", available: false },
+  { id: "jazzcash", label: "JazzCash", note: "Mobile wallet & cards", available: false },
+  { id: "easypaisa", label: "Easypaisa", note: "Mobile wallet & cards", available: false },
 ];
 
 const homeSectionKeys: { key: keyof SiteConfig["home"]; label: string }[] = [
@@ -429,33 +433,44 @@ export function SettingsAdmin({
               <CardHead title="Payment methods" />
               <div className="space-y-3 p-5">
                 <p className="text-[13px] text-ink-muted">
-                  Tick the methods customers can choose at checkout. Turn the others on once the
-                  merchant accounts are approved.
+                  Cash on Delivery is the only method that can collect money today. The rest stay
+                  locked until a merchant account is connected — ask your developer to enable one
+                  once the gateway is approved.
                 </p>
                 {PAYMENT_OPTIONS.map((opt) => {
                   const on = cfg.payments.methods.includes(opt.id);
+                  const locked = !opt.available;
                   return (
                     <button
                       key={opt.id}
+                      disabled={locked}
                       onClick={() => togglePayment(opt.id)}
                       className={cn(
                         "flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left transition-colors",
-                        on ? "border-ink bg-cream/50" : "border-stone-200 hover:border-stone-300",
+                        locked
+                          ? "cursor-not-allowed border-stone-200 bg-stone-50 opacity-60"
+                          : on
+                            ? "border-ink bg-cream/50"
+                            : "border-stone-200 hover:border-stone-300",
                       )}
                     >
                       <span
                         className={cn(
                           "grid h-[18px] w-[18px] shrink-0 place-items-center rounded border",
-                          on ? "border-ink bg-ink text-paper" : "border-stone-300",
+                          on && !locked ? "border-ink bg-ink text-paper" : "border-stone-300",
                         )}
                       >
-                        {on && <Check size={12} strokeWidth={3} />}
+                        {on && !locked && <Check size={12} strokeWidth={3} />}
                       </span>
                       <span className="flex-1">
                         <span className="block text-[13.5px] font-medium text-ink">{opt.label}</span>
                         <span className="block text-[12px] text-ink-muted">{opt.note}</span>
                       </span>
-                      {opt.live && (
+                      {locked ? (
+                        <span className="flex items-center gap-1 rounded-full bg-stone-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-stone-600">
+                          <Lock size={10} /> Needs gateway
+                        </span>
+                      ) : (
                         <span className="rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success">
                           Live
                         </span>
