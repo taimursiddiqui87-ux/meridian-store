@@ -90,8 +90,12 @@ on your PC (open it with Notepad).
 | `ADMIN_USERNAME` | from `.env` |
 | `ADMIN_PASSWORD` | from `.env` |
 | `NEXT_PUBLIC_APP_URL` | `https://zamirastore.com` |
+| `BLOB_READ_WRITE_TOKEN` | from **`.env.local`** — a different file! |
 
 Copy values exactly — no extra spaces, no surrounding quotes.
+
+> `BLOB_READ_WRITE_TOKEN` lives in `.env.local`, not `.env`. Without it the
+> store runs fine but **uploading product photos in the admin fails**.
 
 Now click **CREATE**.
 
@@ -124,6 +128,27 @@ the last 20 lines. Common causes:
 | Blank page / 503 | Wrong Node version — must be 22.x |
 | Loads but products missing, admin login fails | `DATABASE_URL` missing or mistyped |
 | "query engine not found" | Bundle uploaded from an older build — ask me for a fresh one |
+
+---
+
+## Where your data lives
+
+Uploading the site does **not** upload your products or orders. Nothing in the
+bundle contains store data — it is only the program.
+
+| What | Stored where | Notes |
+|---|---|---|
+| Products, orders, customers, banners, discount codes, all Settings | **Neon** cloud Postgres database (AWS, US East) | Reached over the internet using `DATABASE_URL` |
+| Product photos and videos | **Vercel Blob** storage | The database stores only the image URL |
+| The website program itself | hoster.pk | This is the only part you upload |
+
+Consequences worth knowing:
+
+- **Re-uploading the bundle never deletes data.** You can redeploy as often as
+  you like; products and orders are untouched.
+- **Both copies of the site share one database.** The Vercel address and
+  zamirastore.com read and write the same products and orders.
+- **Adding a product in the admin writes to Neon immediately** — no upload needed.
 
 ---
 
