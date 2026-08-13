@@ -48,6 +48,12 @@ if (existsSync(prismaClient)) {
   await cp(prismaClient, path.join(out, "node_modules", ".prisma"), { recursive: true });
 }
 
+// Next copies .env files into the standalone output. They must not ship to
+// shared hosting — secrets are entered in the cPanel environment panel instead.
+for (const f of ["  .env", ".env.local", ".env.production"].map((s) => s.trim())) {
+  await rm(path.join(out, f), { force: true });
+}
+
 // Passenger looks for a start script; standalone's server.js is the entry point.
 const pkg = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 await writeFile(
@@ -57,6 +63,7 @@ await writeFile(
       name: pkg.name,
       version: pkg.version,
       private: true,
+      main: "server.js",
       scripts: { start: "node server.js" },
     },
     null,
@@ -64,10 +71,20 @@ await writeFile(
   ) + "\n",
 );
 
+// Pack with tar, not PowerShell's Compress-Archive: that writes Windows
+// backslashes into the archive, which Linux extractors turn into a flat pile
+// of oddly-named files instead of folders.
+step("Packing zamirastore-deploy.tar.gz");
+const archive = path.join(root, "zamirastore-deploy.tar.gz");
+await rm(archive, { force: true });
+// Run from inside deploy/ so the archive paths stay relative and no absolute
+// path with spaces has to survive shell quoting.
+execSync(`tar -czf "../zamirastore-deploy.tar.gz" .`, { stdio: "inherit", cwd: out });
+
 step("Done");
 console.log(`
-Upload the CONTENTS of:  ${out}
-into your cPanel Node.js "Application root" folder, then set:
+Upload:  ${archive}
+to your cPanel Node.js "Application root" folder and Extract it there, then set:
 
   Node.js version        20.x or newer  (REQUIRED — 10.x will not run this)
   Application mode       Production
